@@ -1,0 +1,50 @@
+[project]
+name = "rag-inference-pipeline"
+version = "0.1.0"
+description = "A RAG inference pipeline with multiple configurable chunking strategies, vector databases, and inference backends."
+readme = "README.md"
+requires-python = ">=3.12, <3.13"
+dependencies = [
+    "fastapi>=0.140.0",
+    "uv",
+    "uvicorn>=0.51.0",
+]
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.[^/]+|
+    build|
+    dist|
+    \.venv|
+    env|
+    venv|
+    __pycache__|
+    .pytest_cache|
+    .git|
+    .github
+)/
+'''
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+
+[dependency-groups]
+dev = [
+    "black>=26.5.1",
+    "locust>=2.46.2",
+    "pre-commit>=4.6.1",
+    "pyright>=1.1.411",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.16.0",
+]
