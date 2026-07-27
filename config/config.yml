@@ -1,0 +1,38 @@
+# ============================================================
+# RAG Inference Pipeline — Configuration
+# ============================================================
+
+project:
+  name: rag-inference-pipeline
+  seed: 42
+  log_level: INFO
+
+# ------------------------------------------------------------
+# VectorDB
+# ------------------------------------------------------------
+
+vectorDB:
+  vdbname: qdrant # qdrant | chroma | pgvector
+  vdbpath: vectorDB
+  distance_metric: cosine # cosine | l2 | ip
+
+# ------------------------------------------------------------
+# Ingestion
+# ------------------------------------------------------------
+ingestion:
+  loading:
+    source_dir: data/
+
+  chunking:
+    strategy: auto # fixed | recursive | auto
+    chunk_size: 512
+    chunk_overlap: 64
+
+  embedding:
+    model: BAAI/bge-small-en-v1.5 # Any HuggingFace embedding model
+    batch_size: 64
+    normalize: true
+
+# ------------------------------------------------------------
+# Retrieval
+# ------------------------------------------------------------

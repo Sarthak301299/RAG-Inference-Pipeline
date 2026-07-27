@@ -43,6 +43,7 @@ tests/load/data
 onnx_models
 model-cache/
 .tensorrtcache
+vectorDB/
 
 # IDE
 .vscode/
