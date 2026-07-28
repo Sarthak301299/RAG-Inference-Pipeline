@@ -50,7 +50,7 @@ class Embedder:
 
         self.stopped = False
 
-    def create_embedding(self, inputs) -> list[list[float]]:
+    def create_embedding(self, inputs: list[str]) -> list[list[float]]:
         if self.stopped:
             raise RuntimeError("Embedder is stopped.")
         try:

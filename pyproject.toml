@@ -19,7 +19,8 @@ dependencies = [
     "langchain-huggingface>=1.2.2",
     "pgembed>=0.2.0",
     "langchain-unstructured>=1.0.1",
-    "vllm==0.26.0"
+    "vllm==0.26.0",
+    "sentence-transformers>=5.6.1",
 ]
 
 [[tool.uv.index]]
