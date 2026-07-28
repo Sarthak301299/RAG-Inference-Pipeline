@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import cast
+from typing import Any, cast
 from uuid import uuid4
 
 import pgembed
@@ -117,19 +117,16 @@ class Indexer:
         texts: list[str],
         embeddings: list[list[float]],
         ids: list[str],
+        metadatas: list[dict[Any, Any]],
     ) -> None:
         points = [
             PointStruct(
                 id=document_id,
                 vector=embedding,
-                payload={
-                    "page_content": text,
-                },
+                payload={"page_content": text, "metadata": metadata},
             )
-            for text, embedding, document_id in zip(
-                texts,
-                embeddings,
-                ids,
+            for text, embedding, document_id, metadata in zip(
+                texts, embeddings, ids, metadatas
             )
         ]
 
@@ -144,7 +141,7 @@ class Indexer:
         texts: list[str],
         embeddings: list[list[float]],
         ids: list[str],
-        metadatas: list[dict[str, str]],
+        metadatas: list[dict[Any, Any]],
     ) -> None:
         from chromadb.api.types import Embeddings, Metadatas
 
@@ -165,7 +162,7 @@ class Indexer:
         texts: list[str],
         embeddings: list[list[float]],
         ids: list[str],
-        metadatas: list[dict[str, str]],
+        metadatas: list[dict[Any, Any]],
     ) -> None:
         database.add_embeddings(
             texts=texts,
@@ -174,19 +171,19 @@ class Indexer:
             ids=ids,
         )
 
-    def index_into_vectorDB(self, inputs: list[tuple[str, list[float]]]) -> None:
+    def index_into_vectorDB(
+        self, inputs: list[tuple[str, list[float]]], metadatas: list[dict[Any, Any]]
+    ) -> None:
         if self.stopped:
             raise RuntimeError("Indexer is stopped.")
         try:
             texts: list[str] = []
             embs: list[list[float]] = []
             ids: list[str] = []
-            metadatas: list[dict[str, str]] = []
             for text, embedding in inputs:
                 texts.append(text)
                 embs.append(embedding)
                 ids.append(str(uuid4()))
-                metadatas.append({"page_content": text})
         except Exception as e:
             logger.error(f"Got Exception {e} while parsing texts, embeddings, and ids")
             raise
@@ -197,6 +194,7 @@ class Indexer:
                 texts=texts,
                 embeddings=embs,
                 ids=ids,
+                metadatas=metadatas,
             )
         elif isinstance(self.database, ChromaVectorStore):
             self._index_chroma(

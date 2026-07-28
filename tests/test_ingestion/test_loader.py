@@ -177,7 +177,7 @@ class TestDynamicDirectoryUnstructuredLoader:
         ]
         assert instance.file_path == [str(source_file)]
 
-    def test_lazy_load_raises_file_not_found_when_no_files_exist(
+    def test_lazy_load_exits_with_empty_when_no_files_exist(
         self,
         tmp_path,
     ):
@@ -188,13 +188,11 @@ class TestDynamicDirectoryUnstructuredLoader:
         instance.rglob = "**/*"
         instance.file_path = []
 
-        with pytest.raises(
-            FileNotFoundError,
-            match="No files found",
-        ):
-            list(instance.lazy_load())
+        out = list(instance.lazy_load())
 
-    def test_lazy_load_raises_file_not_found_for_missing_directory(
+        assert out == []
+
+    def test_lazy_load_exits_with_empty_for_missing_directory(
         self,
         tmp_path,
     ):
@@ -207,11 +205,9 @@ class TestDynamicDirectoryUnstructuredLoader:
         instance.rglob = "**/*"
         instance.file_path = []
 
-        with pytest.raises(
-            FileNotFoundError,
-            match="No files found",
-        ):
-            list(instance.lazy_load())
+        out = list(instance.lazy_load())
+
+        assert out == []
 
     def test_lazy_load_uses_files_added_since_previous_load(
         self,

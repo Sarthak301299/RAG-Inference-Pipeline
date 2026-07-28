@@ -38,7 +38,7 @@ class Embedder:
             raise
         try:
             self.embedding_dim: int | None = (
-                self.model._client.get_sentence_embedding_dimension()
+                self.model._client.get_embedding_dimension()
             )
             if self.embedding_dim is None:
                 raise TypeError("Embedding Dimension is None")

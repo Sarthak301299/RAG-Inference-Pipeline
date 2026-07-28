@@ -41,12 +41,13 @@ class DynamicDirectoryUnstructuredLoader(UnstructuredLoader):
         self.file_path = self._get_current_files()
 
         if not self.file_path:
-            raise FileNotFoundError(
+            logger.warning(
                 f"Warning: No files found in {self.root_dir_path} at load time."
             )
-
-        # 2. Yield documents using Unstructured's built-in processing pipeline
-        yield from super().lazy_load()
+            return []
+        else:
+            # 2. Yield documents using Unstructured's built-in processing pipeline
+            yield from super().lazy_load()
 
     def load(self) -> list[Document]:
         """Collates the lazy generator items into a flat list layout."""

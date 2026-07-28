@@ -35,7 +35,7 @@ class TestEmbedderConfiguration:
         valid_config,
     ):
         class FakeClient:
-            def get_sentence_embedding_dimension(self):
+            def get_embedding_dimension(self):
                 return 384
 
         class FakeModel:
@@ -61,7 +61,7 @@ class TestEmbedderConfiguration:
         monkeypatch,
     ):
         class FakeClient:
-            def get_sentence_embedding_dimension(self):
+            def get_embedding_dimension(self):
                 return 384
 
         class FakeModel:
@@ -139,7 +139,7 @@ class TestModelInitialization:
         captured = {}
 
         class FakeClient:
-            def get_sentence_embedding_dimension(self):
+            def get_embedding_dimension(self):
                 return 768
 
         class FakeModel:
@@ -224,7 +224,7 @@ class TestEmbeddingDimension:
         valid_config,
     ):
         class FakeClient:
-            def get_sentence_embedding_dimension(self):
+            def get_embedding_dimension(self):
                 return 1536
 
         class FakeModel:
@@ -248,7 +248,7 @@ class TestEmbeddingDimension:
         caplog,
     ):
         class FakeClient:
-            def get_sentence_embedding_dimension(self):
+            def get_embedding_dimension(self):
                 return None
 
         class FakeModel:
@@ -288,7 +288,7 @@ class TestEmbeddingDimension:
         caplog,
     ):
         class FakeClient:
-            def get_sentence_embedding_dimension(self):
+            def get_embedding_dimension(self):
                 return dimension
 
         class FakeModel:
@@ -319,7 +319,7 @@ class TestEmbeddingDimension:
         caplog,
     ):
         class FakeClient:
-            def get_sentence_embedding_dimension(self):
+            def get_embedding_dimension(self):
                 raise RuntimeError("dimension lookup failed")
 
         class FakeModel:

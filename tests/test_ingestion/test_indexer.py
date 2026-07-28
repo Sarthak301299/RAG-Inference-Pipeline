@@ -493,6 +493,10 @@ class TestBackendSpecificIndexing:
                 "id-1",
                 "id-2",
             ],
+            metadatas=[
+                {"source": "a.txt"},
+                {"source": "b.txt"},
+            ],
         )
 
         assert captured["collection_name"] == ("test_collection")
@@ -505,12 +509,14 @@ class TestBackendSpecificIndexing:
         assert points[0].vector == [0.1, 0.2]
         assert points[0].payload == {
             "page_content": "first",
+            "metadata": {"source": "a.txt"},
         }
 
         assert points[1].id == "id-2"
         assert points[1].vector == [0.3, 0.4]
         assert points[1].payload == {
             "page_content": "second",
+            "metadata": {"source": "b.txt"},
         }
 
     def test_index_qdrant_with_empty_input(
@@ -527,10 +533,7 @@ class TestBackendSpecificIndexing:
             client = FakeClient()
 
         indexer_instance._index_qdrant(
-            database=FakeQdrantDatabase(),
-            texts=[],
-            embeddings=[],
-            ids=[],
+            database=FakeQdrantDatabase(), texts=[], embeddings=[], ids=[], metadatas=[]
         )
 
         assert captured["collection_name"] == ("test_collection")
@@ -570,8 +573,8 @@ class TestBackendSpecificIndexing:
                 "id-2",
             ],
             metadatas=[
-                {"page_content": "first"},
-                {"page_content": "second"},
+                {"source": "file1"},
+                {"author": "alice"},
             ],
         )
 
@@ -590,8 +593,8 @@ class TestBackendSpecificIndexing:
         ]
 
         assert captured["metadatas"] == [
-            {"page_content": "first"},
-            {"page_content": "second"},
+            {"source": "file1"},
+            {"author": "alice"},
         ]
 
         assert captured["documents"] == [
@@ -624,8 +627,8 @@ class TestBackendSpecificIndexing:
                 "id-2",
             ],
             metadatas=[
-                {"page_content": "first"},
-                {"page_content": "second"},
+                {"source": "file1"},
+                {"author": "alice"},
             ],
         )
 
@@ -643,8 +646,8 @@ class TestBackendSpecificIndexing:
                 "id-2",
             ],
             "metadatas": [
-                {"page_content": "first"},
-                {"page_content": "second"},
+                {"source": "file1"},
+                {"author": "alice"},
             ],
         }
 
@@ -670,7 +673,10 @@ class TestIndexIntoVectorDB:
             base_indexer.index_into_vectorDB(
                 [
                     ("text", [0.1, 0.2]),
-                ]
+                ],
+                [
+                    {"source": "file1"},
+                ],
             )
 
     def test_dispatches_to_qdrant(
@@ -706,7 +712,10 @@ class TestIndexIntoVectorDB:
         base_indexer.index_into_vectorDB(
             [
                 ("hello", [0.1, 0.2]),
-            ]
+            ],
+            [
+                {"source": "file.txt"},
+            ],
         )
 
         assert captured["database"] is database
@@ -753,7 +762,10 @@ class TestIndexIntoVectorDB:
         base_indexer.index_into_vectorDB(
             [
                 ("hello", [0.1, 0.2]),
-            ]
+            ],
+            [
+                {"source": "file.txt"},
+            ],
         )
 
         assert captured["database"] is database
@@ -762,7 +774,7 @@ class TestIndexIntoVectorDB:
         assert captured["ids"] == ["generated-id"]
         assert captured["metadatas"] == [
             {
-                "page_content": "hello",
+                "source": "file.txt",
             }
         ]
 
@@ -799,7 +811,10 @@ class TestIndexIntoVectorDB:
         base_indexer.index_into_vectorDB(
             [
                 ("hello", [0.1, 0.2]),
-            ]
+            ],
+            [
+                {"source": "file.txt"},
+            ],
         )
 
         assert captured["database"] is database
@@ -808,7 +823,7 @@ class TestIndexIntoVectorDB:
         assert captured["ids"] == ["generated-id"]
         assert captured["metadatas"] == [
             {
-                "page_content": "hello",
+                "source": "file.txt",
             }
         ]
 
@@ -836,7 +851,7 @@ class TestIndexIntoVectorDB:
 
         base_indexer._index_pgvector = fake_index_pgvector
 
-        base_indexer.index_into_vectorDB([])
+        base_indexer.index_into_vectorDB([], [])
 
         assert captured["texts"] == []
         assert captured["embeddings"] == []
@@ -857,7 +872,8 @@ class TestIndexIntoVectorDB:
             base_indexer.index_into_vectorDB(
                 [
                     ("text-only",),
-                ]
+                ],
+                [{"source": "file.txt"}],
             )
 
         assert "while parsing texts, embeddings, and ids" in caplog.text
@@ -887,7 +903,8 @@ class TestIndexIntoVectorDB:
             base_indexer.index_into_vectorDB(
                 [
                     ("text", [0.1, 0.2]),
-                ]
+                ],
+                [{"source": "file.txt"}],
             )
 
         assert "while parsing texts, embeddings, and ids" in caplog.text
