@@ -5,8 +5,11 @@ description = "A RAG inference pipeline with a coding agent layer."
 readme = "README.md"
 requires-python = ">=3.12, <3.13"
 dependencies = [
-    "fastapi>=0.140.0",
+    "fastapi>=0.133.0,<0.137.0",
     "torch",
+    "torchvision",
+    "torchaudio",
+    "torchcodec",
     "uv",
     "uvicorn>=0.51.0",
     "langchain-text-splitters>=1.1.2",
@@ -16,15 +19,20 @@ dependencies = [
     "langchain-huggingface>=1.2.2",
     "pgembed>=0.2.0",
     "langchain-unstructured>=1.0.1",
+    "vllm==0.26.0"
 ]
 
 [[tool.uv.index]]
-name = "pytorch-cu126"
-url = "https://download.pytorch.org/whl/cu126"
+name = "pytorch-cu129"
+url = "https://download.pytorch.org/whl/cu129"
 explicit = true
 
 [tool.uv.sources]
-torch = { index = "pytorch-cu126" }
+torch = { index = "pytorch-cu129" }
+torchvision = { index = "pytorch-cu129" }
+torchaudio = { index = "pytorch-cu129" }
+torchcodec = { index = "pytorch-cu129" }
+vllm = { url = "https://github.com/vllm-project/vllm/releases/download/v0.26.0/vllm-0.26.0+cu129-cp38-abi3-manylinux_2_28_x86_64.whl" }
 
 [tool.black]
 line-length = 88

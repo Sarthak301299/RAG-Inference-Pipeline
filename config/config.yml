@@ -4,7 +4,6 @@
 
 project:
   name: rag-inference-pipeline
-  seed: 42
   log_level: INFO
 
 # ------------------------------------------------------------
@@ -36,3 +35,24 @@ ingestion:
 # ------------------------------------------------------------
 # Retrieval
 # ------------------------------------------------------------
+
+# ------------------------------------------------------------
+# Generation
+# ------------------------------------------------------------
+generation:
+  backend: vllm
+  model: Qwen/Qwen2.5-Coder-1.5B-Instruct # Any HuggingFace generation model
+  vllm:
+    temperature: 0.2
+    max_num_seqs: 256
+    max_num_batched_tokens: 64
+    max_tokens: 4096
+    top_p: 0.95
+  tensorrt:
+    compile_dir: .tensorrtcache
+
+# ------------------------------------------------------------
+# API
+# ------------------------------------------------------------
+api:
+  max_active_requests: 256

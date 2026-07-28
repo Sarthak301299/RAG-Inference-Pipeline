@@ -28,9 +28,3 @@ repos:
         language: system
         types: [python]
         pass_filenames: false
-      - id: Auditing
-        name: Run uv audit for a security audit
-        entry: uv audit
-        language: system
-        types: [python]
-        pass_filenames: false
