@@ -21,6 +21,7 @@ dependencies = [
     "langchain-unstructured>=1.0.1",
     "vllm==0.26.0",
     "sentence-transformers>=5.6.1",
+    "unstructured[all-docs]>=0.24.1",
 ]
 
 [[tool.uv.index]]

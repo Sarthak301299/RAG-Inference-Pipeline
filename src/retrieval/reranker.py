@@ -32,16 +32,22 @@ class Reranker:
     ) -> list[Document]:
         if self.stopped:
             raise RuntimeError("Reranker is stopped.")
+        if inputs == []:
+            return []
         try:
+            texts: list[str]
+            docs: list[Document]
+            texts, docs = map(list, zip(*inputs))
+            doc_page = [doc.page_content for doc in docs]
+            textpairs: list[tuple[str, str]] = list(zip(texts, doc_page))
             scores: torch.Tensor = self.model.predict(
-                inputs=inputs, batch_size=self.batch_size
+                inputs=textpairs, batch_size=self.batch_size
             )
             # Some models e.g bert-multilingual-passage-reranking-msmarco
             # gives two score not_relevant and relevant as compared to the query.
             if len(scores.shape) > 1:  # we are going to get the relevant scores
                 scores = scores[:, 1]
-            doc = [input[1] for input in inputs]
-            scored_docs = list(zip(doc, scores))
+            scored_docs = list(zip(docs, scores))
             sorted_docs = sorted(scored_docs, key=lambda x: x[1].item(), reverse=True)
             reranked_docs = [doc for doc, _ in sorted_docs[:outcount]]
         except Exception as e:

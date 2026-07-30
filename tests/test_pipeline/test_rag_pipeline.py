@@ -62,35 +62,37 @@ def pipeline(monkeypatch, config):
 
     class DummyLoader:
         def __init__(self, cfg):
-            pass
+            self.stopped = False
 
     class DummyEmbedder:
         def __init__(self, cfg):
             self.embedding_dim = 4
             self.model = object()
+            self.stopped = False
 
     class DummyIndexer:
         def __init__(self, *args):
             self.database = object()
+            self.stopped = False
 
         def index_into_vectorDB(self, *args):
             self.called = args
 
     class DummyChunker:
         def __init__(self, cfg):
-            pass
+            self.stopped = False
 
     class DummyRetriever:
         def __init__(self, *args):
-            pass
+            self.stopped = False
 
     class DummyReranker:
         def __init__(self, cfg):
-            pass
+            self.stopped = False
 
     class DummyGenerator:
         def __init__(self, cfg):
-            pass
+            self.stopped = False
 
     monkeypatch.setattr("src.pipeline.rag_pipeline.Loader", DummyLoader)
     monkeypatch.setattr("src.pipeline.rag_pipeline.Embedder", DummyEmbedder)
@@ -348,6 +350,10 @@ def test_init_generator_failure(monkeypatch, config):
 # ---------------------------------------------------------------------
 
 
+def test_context_ingested_initially_false(pipeline):
+    assert pipeline.context_ingested is False
+
+
 def test_ingest_data_success(pipeline):
     docs = {
         ".txt": [
@@ -376,6 +382,7 @@ def test_ingest_data_success(pipeline):
 
     assert called["inputs"] == [("abc", [1.0])]
     assert called["metadata"] == [{"source": "file"}]
+    assert pipeline.context_ingested is True
 
 
 def test_ingest_data_stopped(pipeline):
@@ -474,11 +481,82 @@ async def test_generate_contextualized_output_generator_failure(
 
 
 # ---------------------------------------------------------------------
-# cleanup
+# shutdown
 # ---------------------------------------------------------------------
 
 
-def test_cleanup(pipeline):
-    pipeline.cleanup()
+def test_shutdown_success(pipeline):
+    called = []
 
-    assert pipeline.stopped
+    def make_cleanup(name):
+        def cleanup():
+            called.append(name)
+
+        return cleanup
+
+    pipeline.loader.cleanup = make_cleanup("loader")
+    pipeline.chunker.cleanup = make_cleanup("chunker")
+    pipeline.embedder.cleanup = make_cleanup("embedder")
+    pipeline.indexer.cleanup = make_cleanup("indexer")
+    pipeline.retriver.cleanup = make_cleanup("retriever")
+    pipeline.reranker.cleanup = make_cleanup("reranker")
+    pipeline.generator.cleanup = make_cleanup("generator")
+
+    pipeline.shutdown()
+
+    assert pipeline.stopped is True
+
+    assert called == [
+        "loader",
+        "chunker",
+        "embedder",
+        "indexer",
+        "retriever",
+        "reranker",
+        "generator",
+    ]
+
+
+def test_shutdown_cleanup_failure(pipeline):
+    pipeline.loader.cleanup = lambda: (_ for _ in ()).throw(RuntimeError("boom"))
+
+    with pytest.raises(RuntimeError, match="boom"):
+        pipeline.shutdown()
+
+    assert pipeline.stopped is True
+
+
+# ---------------------------------------------------------------------
+# is_stopped
+# ---------------------------------------------------------------------
+
+
+def test_is_stopped_false(pipeline):
+    pipeline.stopped = False
+
+    pipeline.loader.stopped = False
+    pipeline.chunker.stopped = False
+    pipeline.embedder.stopped = False
+    pipeline.indexer.stopped = False
+    pipeline.retriver.stopped = False
+    pipeline.reranker.stopped = False
+    pipeline.generator.stopped = False
+
+    assert pipeline.is_stopped() is False
+
+
+@pytest.mark.parametrize(
+    "attr",
+    [
+        "loader",
+        "chunker",
+        "embedder",
+        "indexer",
+        "retriver",
+        "reranker",
+        "generator",
+    ],
+)
+def test_is_stopped_when_component_stopped(pipeline, attr):
+    getattr(pipeline, attr).stopped = True
+    assert pipeline.is_stopped() is True

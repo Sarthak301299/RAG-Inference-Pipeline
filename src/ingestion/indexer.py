@@ -214,4 +214,11 @@ class Indexer:
             )
 
     def cleanup(self) -> None:
-        self.stopped = True
+        if not self.stopped:
+            self.stopped = True
+            if isinstance(self.database, QdrantVectorStore):
+                self.database.client.delete_collection(self.collection_name)
+            elif isinstance(self.database, ChromaVectorStore):
+                self.database._client.delete_collection(self.collection_name)
+            else:
+                self.database._engine.drop_table(table_name=self.collection_name)

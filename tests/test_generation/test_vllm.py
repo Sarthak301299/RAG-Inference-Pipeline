@@ -18,13 +18,26 @@ def valid_config():
             "max_num_batched_tokens": "1024",
             "max_tokens": "256",
             "top_p": "0.95",
+            "max_thought_process_words": "2000",
+            "max_answer_words": "15000",
         },
     }
 
 
 class FakeEngine:
+    def __init__(self):
+        self.vllm_config = {}
+
     def shutdown(self):
         pass
+
+
+class FakePreprocessor:
+    def __init__(self, vllm_config):
+        self.config = vllm_config
+
+    def preprocess(self, prompt):
+        return prompt
 
 
 class FakeSchema:
@@ -33,11 +46,15 @@ class FakeSchema:
         return {"type": "object"}
 
 
+def make_fake_schema(max_thought_process_len, max_answer_len):
+    return FakeSchema
+
+
 def test_init(monkeypatch, valid_config):
     monkeypatch.setattr(
         vllm_generator,
         "AsyncEngineArgs",
-        lambda: SimpleNamespace(),
+        lambda **kwargs: SimpleNamespace(**kwargs),
     )
 
     monkeypatch.setattr(
@@ -60,8 +77,14 @@ def test_init(monkeypatch, valid_config):
 
     monkeypatch.setattr(
         vllm_generator,
-        "RAGResponseSchema",
-        FakeSchema,
+        "make_output_schema",
+        make_fake_schema,
+    )
+
+    monkeypatch.setattr(
+        vllm_generator,
+        "InputPreprocessor",
+        FakePreprocessor,
     )
 
     gen = vllm_generator.VLLMGenerator(valid_config)
@@ -142,7 +165,7 @@ def test_engine_initialisation_failure(monkeypatch, valid_config):
     monkeypatch.setattr(
         vllm_generator,
         "AsyncEngineArgs",
-        lambda: SimpleNamespace(),
+        lambda **kwargs: SimpleNamespace(**kwargs),
     )
 
     monkeypatch.setattr(
@@ -167,10 +190,17 @@ class FakeResult:
 
 @pytest.mark.asyncio
 async def test_generate(monkeypatch):
+    monkeypatch.setattr(
+        vllm_generator,
+        "TextPrompt",
+        lambda prompt: prompt,
+    )
+
     gen = vllm_generator.VLLMGenerator.__new__(vllm_generator.VLLMGenerator)
 
     gen.sampling_params = object()  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
     gen.stopped = False
+    gen.preprocessor = FakePreprocessor(vllm_config={"a": "b"})  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
 
     async def fake_stream():
         yield FakeResult("first")
@@ -196,6 +226,7 @@ async def test_generate_empty_stream():
 
     gen.sampling_params = object()  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
     gen.stopped = False
+    gen.preprocessor = FakePreprocessor(vllm_config={"a": "b"})  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
 
     async def fake_stream():
         if False:
@@ -218,6 +249,7 @@ async def test_generate_exception(caplog):
 
     gen.sampling_params = object()  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
     gen.stopped = False
+    gen.preprocessor = FakePreprocessor(vllm_config={"a": "b"})  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
 
     class Engine:
         def generate(self, **kwargs):

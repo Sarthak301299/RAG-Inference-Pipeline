@@ -116,7 +116,9 @@ def test_rerank_documents_1d_scores(valid_config, fake_cross_encoder):
         docs[2],
     ]
 
-    assert fake_cross_encoder.last_inputs == inputs
+    assert fake_cross_encoder.last_inputs == [
+        (query, doc.page_content) for query, doc in inputs
+    ]
     assert fake_cross_encoder.last_batch_size == 4
 
 
@@ -197,13 +199,25 @@ def test_rerank_predict_failure(
 ):
     rr = Reranker(valid_config)
 
+    docs = [
+        Document(page_content="doc1"),
+        Document(page_content="doc2"),
+        Document(page_content="doc3"),
+    ]
+
+    inputs = [
+        ("query", docs[0]),
+        ("query", docs[1]),
+        ("query", docs[2]),
+    ]
+
     fake_cross_encoder.exception = RuntimeError("prediction failed")
 
     with (
         caplog.at_level(logging.ERROR),
         pytest.raises(RuntimeError, match="prediction failed"),
     ):
-        rr.rerank_documents([], 1)
+        rr.rerank_documents(inputs, 1)
 
     assert "invoking reranker" in caplog.text
 

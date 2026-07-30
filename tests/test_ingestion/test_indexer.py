@@ -910,18 +910,78 @@ class TestIndexIntoVectorDB:
         assert "while parsing texts, embeddings, and ids" in caplog.text
 
 
+class FakeClient:
+    def __init__(self):
+        self.collection = "abc"
+
+    def delete_collection(self, input):
+        del self.collection
+
+    def drop_table(self, table_name):
+        del self.collection
+
+
+class FakeVectorStore:
+    def __init__(self):
+        self.client = FakeClient()
+        self._client = FakeClient()
+        self._engine = FakeClient()
+
+
 class TestCleanup:
-    def test_cleanup_stops_indexer(self):
+    def test_cleanup_stops_indexer_qdrant(self, monkeypatch):
+        monkeypatch.setattr(
+            indexer,
+            "QdrantVectorStore",
+            FakeVectorStore,
+        )
         instance = indexer.Indexer.__new__(indexer.Indexer)
         instance.stopped = False
+        instance.collection_name = "abc"
+        instance.database = FakeVectorStore()  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
 
         instance.cleanup()
 
         assert instance.stopped is True
+        assert not hasattr(instance.database.client, "collection")  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
+
+    def test_cleanup_stops_indexer_chroma(self, monkeypatch):
+        monkeypatch.setattr(
+            indexer,
+            "ChromaVectorStore",
+            FakeVectorStore,
+        )
+        instance = indexer.Indexer.__new__(indexer.Indexer)
+        instance.stopped = False
+        instance.collection_name = "abc"
+        instance.database = FakeVectorStore()  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
+
+        instance.cleanup()
+
+        assert instance.stopped is True
+        assert not hasattr(instance.database._client, "collection")  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
+
+    def test_cleanup_stops_indexer_pgvector(self, monkeypatch):
+        monkeypatch.setattr(
+            indexer,
+            "PGVectorStore",
+            FakeVectorStore,
+        )
+        instance = indexer.Indexer.__new__(indexer.Indexer)
+        instance.stopped = False
+        instance.collection_name = "abc"
+        instance.database = FakeVectorStore()  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
+
+        instance.cleanup()
+
+        assert instance.stopped is True
+        assert not hasattr(instance.database._engine, "collection")  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
 
     def test_cleanup_is_idempotent(self):
         instance = indexer.Indexer.__new__(indexer.Indexer)
         instance.stopped = False
+        instance.collection_name = "abc"
+        instance.database = FakeVectorStore()  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
 
         instance.cleanup()
         instance.cleanup()

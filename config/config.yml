@@ -33,7 +33,7 @@ ingestion:
   embedding:
     model: BAAI/bge-small-en-v1.5 # Any HuggingFace embedding model
     batch_size: 64
-    normalize: true
+    normalize: "true"
 
 # ------------------------------------------------------------
 # Retrieval
@@ -52,14 +52,10 @@ generation:
   vllm:
     temperature: 0.2
     max_num_seqs: 256
-    max_num_batched_tokens: 64
+    max_num_batched_tokens: 2048
     max_tokens: 4096
     top_p: 0.95
+    max_thought_process_words: 200
+    max_answer_words: 3000
   tensorrt:
     compile_dir: .tensorrtcache
-
-# ------------------------------------------------------------
-# API
-# ------------------------------------------------------------
-api:
-  max_active_requests: 256

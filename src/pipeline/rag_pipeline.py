@@ -23,12 +23,14 @@ logger = logging.getLogger(__name__)
 class RAGPipeLine:
     def __init__(self) -> None:
         self.stopped: bool = True
+        self.context_ingested = False
         try:
             with open("config/config.yml", "r") as file:
                 self.config = yaml.safe_load(file)
         except Exception as e:
             logger.error(f"Got Exception {e} parsing configuration file")
             raise
+        logger.info("Initializing Ingestion Module.")
         try:
             self.loader = Loader(self.config["ingestion"]["loading"])
             self.embedder = Embedder(self.config["ingestion"]["embedding"])
@@ -43,6 +45,7 @@ class RAGPipeLine:
         except Exception as e:
             logger.error(f"Got Exception {e} initializing ingestion objects")
             raise
+        logger.info("Initializing Retrival Module.")
         try:
             self.final_chunk_count = int(self.config["vectorDB"]["final_chunk_count"])
             self.retrieve_chunk_count = int(
@@ -57,13 +60,14 @@ class RAGPipeLine:
         except Exception as e:
             logger.error(f"Got Exception {e} initializing retrieval objects")
             raise
+        logger.info("Initializing Generator Module.")
         try:
             self.generator = VLLMGenerator(self.config["generation"])
         except Exception as e:
             logger.error(f"Got Exception {e} initializing generation objects")
             raise
-
         self.stopped = False
+        logger.info("RAG Pipeline Initialized.")
 
     def ingest_data(self) -> None:
         if self.stopped:
@@ -82,6 +86,7 @@ class RAGPipeLine:
         except Exception as e:
             logger.error(f"Got Exception {e} while ingesting context.")
             raise
+        self.context_ingested = True
         logger.info("Context has been ingested.")
 
     def build_prompts(
@@ -120,5 +125,29 @@ class RAGPipeLine:
             raise
         return responses
 
-    def cleanup(self) -> None:
+    def shutdown(self):
         self.stopped = True
+        try:
+            self.loader.cleanup()
+            self.chunker.cleanup()
+            self.embedder.cleanup()
+            self.indexer.cleanup()
+            self.retriver.cleanup()
+            self.reranker.cleanup()
+            self.generator.cleanup()
+        except Exception as e:
+            logger.error(f"Got Exception {e} while cleaning up RAG modules")
+            raise
+
+    def is_stopped(self) -> bool:
+        output: bool = (
+            self.loader.stopped
+            or self.chunker.stopped
+            or self.embedder.stopped
+            or self.indexer.stopped
+            or self.retriver.stopped
+            or self.reranker.stopped
+            or self.generator.stopped
+            or self.stopped
+        )
+        return output

@@ -17,7 +17,9 @@ class RAGInputPromptFormat(BaseModel):
         "2. If the answer cannot be found in the context, respond with: 'I cannot find the answer in the provided documents.'\n"
         "3. Do not speculate, extrapolate, or make up facts.\n"
         "4. Cite the specific source or document title when presenting a fact if available.\n"
-        "5. If conflicting information appears across sources, highlight the discrepancy explicitly.\n"
+        "5. DO NOT cite any sources that do not exist. DO NOT cite the same source multiple times.\n"
+        "6. If no sources exist, clearly state 'None' in the sources."
+        "7. If conflicting information appears across sources, highlight the discrepancy explicitly.\n"
     )
 
     def get_formatted_prompt(self) -> str:
@@ -30,5 +32,5 @@ class RAGInputPromptFormat(BaseModel):
             prompt += f"{content}\n"
             prompt += f"--- END CHUNK {idx} ---\n\n"
 
-        prompt += f"User Query:\n{self.user_query}"
+        prompt += f"User Query:\n{self.user_query}\nResponse: "
         return prompt
