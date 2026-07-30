@@ -64,7 +64,7 @@ class Indexer:
                 self.vectorDB = ChromaClient(path=self.vdbpath)
                 self.collection_name = "chroma_collection"
                 self.vectorDB.get_or_create_collection(
-                    name=self.collection_name, metadata={"hsnw:space": self.distmetname}
+                    name=self.collection_name, metadata={"hnsw:space": self.distmetname}
                 )
                 self.database = ChromaVectorStore(
                     client=self.vectorDB,

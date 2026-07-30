@@ -20,7 +20,6 @@ class Embedder:
             if normalize_value not in {"true", "false"}:
                 raise ValueError("normalize must be either 'true' or 'false'.")
             self.normalize = normalize_value == "true"
-            self.normalize: bool = bool(config["normalize"])
         except Exception as e:
             logger.error(f"Got Exception {e} reading configuration.")
             raise

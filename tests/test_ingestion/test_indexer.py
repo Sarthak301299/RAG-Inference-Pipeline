@@ -247,7 +247,7 @@ class TestChromaInitialization:
         assert captured["collection_kwargs"] == {
             "name": "chroma_collection",
             "metadata": {
-                "hsnw:space": "cosine",
+                "hnsw:space": "cosine",
             },
         }
 
