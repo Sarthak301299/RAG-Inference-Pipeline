@@ -23,7 +23,7 @@ vectorDB:
 # ------------------------------------------------------------
 ingestion:
   loading:
-    source_dir: data/
+    source_dir: data/eval/codesearchnet/corpus
 
   chunking:
     strategy: auto # fixed | recursive | auto
@@ -50,7 +50,7 @@ generation:
   backend: vllm
   model: Qwen/Qwen2.5-Coder-1.5B-Instruct # Any HuggingFace generation model
   vllm:
-    temperature: 0.2
+    temperature: 0.1
     max_num_seqs: 256
     max_num_batched_tokens: 2048
     max_tokens: 4096
@@ -59,3 +59,23 @@ generation:
     max_answer_words: 3000
   tensorrt:
     compile_dir: .tensorrtcache
+
+# ------------------------------------------------------------
+# Evaluation
+# ------------------------------------------------------------
+eval:
+  dataset_path: data/eval/codesearchnet/qa_set.jsonl
+  k_values: [3, 5]
+  output_dir: results/eval
+  codesearchnet:
+    output_dir: data/eval/codesearchnet # corpus/ and qa_set.jsonl written here
+    dataset_name: code-search-net/code_search_net
+    config_name: python # language subset
+    split: test
+    num_examples: 20
+    seed: 42
+    # Field names as of the current Hugging Face schema -- override if the
+    # dataset's column names change:
+    docstring_field: func_documentation_string
+    code_field: func_code_string
+    path_field: func_path_in_repository

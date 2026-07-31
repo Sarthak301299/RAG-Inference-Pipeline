@@ -560,3 +560,164 @@ def test_is_stopped_false(pipeline):
 def test_is_stopped_when_component_stopped(pipeline, attr):
     getattr(pipeline, attr).stopped = True
     assert pipeline.is_stopped() is True
+
+
+# ---------------------------------------------------------------------
+# generate_with_retrieval
+# ---------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_generate_with_retrieval_success(pipeline):
+    doc1 = Document(page_content="chunk1", metadata={"source": "doc1.py"})
+    doc2 = Document(page_content="chunk2", metadata={"source": "doc2.py"})
+
+    pipeline.retriver.retrive_documents = lambda q: [doc1, doc2]
+    pipeline.reranker.rerank_documents = lambda pairs, n: [doc1, doc2]
+    pipeline.build_prompts = lambda pairs: ["prompt"]
+
+    async def fake_generate(prompt, rid):
+        return "response-json"
+
+    pipeline.generator.generate = fake_generate
+
+    output = await pipeline.generate_with_retrieval(["query"])
+
+    assert len(output) == 1
+    result = output[0]
+    assert result["query"] == "query"
+    assert result["retrieved_ids"] == ["doc1.py", "doc2.py"]
+    assert result["context_chunks"] == ["chunk1", "chunk2"]
+    assert result["response"] == "response-json"
+
+
+@pytest.mark.asyncio
+async def test_generate_with_retrieval_multiple_queries_preserve_order(pipeline):
+    doc_a = Document(page_content="a", metadata={"source": "a.py"})
+    doc_b = Document(page_content="b", metadata={"source": "b.py"})
+
+    docs_by_query = {"first": [doc_a], "second": [doc_b]}
+    pipeline.retriver.retrive_documents = lambda q: docs_by_query[q]
+    pipeline.reranker.rerank_documents = lambda pairs, n: [doc for _, doc in pairs]
+    pipeline.build_prompts = lambda pairs: [f"prompt-{q}" for q, _ in pairs]
+
+    async def fake_generate(prompt, rid):
+        return f"response-for-{prompt}"
+
+    pipeline.generator.generate = fake_generate
+
+    output = await pipeline.generate_with_retrieval(["first", "second"])
+
+    assert [r["query"] for r in output] == ["first", "second"]
+    assert output[0]["retrieved_ids"] == ["a.py"]
+    assert output[1]["retrieved_ids"] == ["b.py"]
+    assert output[0]["response"] == "response-for-prompt-first"
+    assert output[1]["response"] == "response-for-prompt-second"
+
+
+@pytest.mark.asyncio
+async def test_generate_with_retrieval_missing_source_metadata_defaults_empty(
+    pipeline,
+):
+    doc = Document(page_content="chunk")  # no "source" key in metadata
+
+    pipeline.retriver.retrive_documents = lambda q: [doc]
+    pipeline.reranker.rerank_documents = lambda pairs, n: [doc]
+    pipeline.build_prompts = lambda pairs: ["prompt"]
+
+    async def fake_generate(prompt, rid):
+        return "response"
+
+    pipeline.generator.generate = fake_generate
+
+    output = await pipeline.generate_with_retrieval(["query"])
+
+    assert output[0]["retrieved_ids"] == [""]
+
+
+@pytest.mark.asyncio
+async def test_generate_with_retrieval_no_documents_retrieved(pipeline):
+    pipeline.retriver.retrive_documents = lambda q: []
+    pipeline.reranker.rerank_documents = lambda pairs, n: []
+    pipeline.build_prompts = lambda pairs: ["prompt"]
+
+    async def fake_generate(prompt, rid):
+        return "response"
+
+    pipeline.generator.generate = fake_generate
+
+    output = await pipeline.generate_with_retrieval(["query"])
+
+    assert output[0]["retrieved_ids"] == []
+    assert output[0]["context_chunks"] == []
+
+
+@pytest.mark.asyncio
+async def test_generate_with_retrieval_stopped(pipeline):
+    pipeline.stopped = True
+
+    with pytest.raises(RuntimeError):
+        await pipeline.generate_with_retrieval(["q"])
+
+
+@pytest.mark.asyncio
+async def test_generate_with_retrieval_retriever_failure(pipeline):
+    pipeline.retriver.retrive_documents = lambda q: (_ for _ in ()).throw(
+        RuntimeError("retriever boom")
+    )
+
+    with pytest.raises(RuntimeError, match="retriever boom"):
+        await pipeline.generate_with_retrieval(["q"])
+
+
+@pytest.mark.asyncio
+async def test_generate_with_retrieval_reranker_failure(pipeline):
+    doc = Document(page_content="chunk", metadata={"source": "doc.py"})
+
+    pipeline.retriver.retrive_documents = lambda q: [doc]
+    pipeline.reranker.rerank_documents = lambda pairs, n: (_ for _ in ()).throw(
+        RuntimeError("reranker boom")
+    )
+
+    with pytest.raises(RuntimeError, match="reranker boom"):
+        await pipeline.generate_with_retrieval(["q"])
+
+
+@pytest.mark.asyncio
+async def test_generate_with_retrieval_generator_failure(pipeline):
+    doc = Document(page_content="chunk", metadata={"source": "doc.py"})
+
+    pipeline.retriver.retrive_documents = lambda q: [doc]
+    pipeline.reranker.rerank_documents = lambda pairs, n: [doc]
+    pipeline.build_prompts = lambda pairs: ["prompt"]
+
+    async def fail(*args):
+        raise RuntimeError("generator boom")
+
+    pipeline.generator.generate = fail
+
+    with pytest.raises(RuntimeError, match="generator boom"):
+        await pipeline.generate_with_retrieval(["q"])
+
+
+@pytest.mark.asyncio
+async def test_generate_with_retrieval_does_not_mutate_generate_contextualized_output(
+    pipeline,
+):
+    """Guards against future edits accidentally coupling the two methods --
+    generate_contextualized_output must keep returning list[str]."""
+    doc = Document(page_content="chunk", metadata={"source": "doc.py"})
+
+    pipeline.retriver.retrive_documents = lambda q: [doc]
+    pipeline.reranker.rerank_documents = lambda pairs, n: [doc]
+    pipeline.build_prompts = lambda pairs: ["prompt"]
+
+    async def fake_generate(prompt, rid):
+        return "answer"
+
+    pipeline.generator.generate = fake_generate
+
+    output = await pipeline.generate_contextualized_output(["query"])
+
+    assert output == ["answer"]
+    assert isinstance(output[0], str)

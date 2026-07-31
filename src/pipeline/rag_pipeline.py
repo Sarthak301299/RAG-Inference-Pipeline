@@ -139,6 +139,59 @@ class RAGPipeLine:
             logger.error(f"Got Exception {e} while cleaning up RAG modules")
             raise
 
+    async def generate_with_retrieval(
+        self, queries: list[str]
+    ) -> list[dict[str, str | list[str]]]:
+        """Same as generate_contextualized_output, but also returns the
+        retrieved/reranked document ids and their text, for use in evaluation.
+
+        Returns a list (one entry per query) of:
+            {
+                "query": str,
+                "retrieved_ids": list[str],   # from Document.metadata["source"]
+                "context_chunks": list[str],  # reranked chunk page_content
+                "response": str,              # raw JSON string from the generator
+            }
+        """
+        if self.stopped:
+            raise RuntimeError("RAG Pipeline is stopped.")
+        try:
+            query_retrived_doc_pairs: list[list[tuple[str, Document]]] = [
+                [(query, doc) for doc in self.retriver.retrive_documents(query)]
+                for query in queries
+            ]
+            reranked_docs: list[list[Document]] = [
+                self.reranker.rerank_documents(qrdpair, self.final_chunk_count)
+                for qrdpair in query_retrived_doc_pairs
+            ]
+        except Exception as e:
+            logger.error(f"Got Exception {e} while retrieving from VectorDB.")
+            raise
+
+        try:
+            prompts: list[str] = self.build_prompts(list(zip(queries, reranked_docs)))
+            tasks = [
+                self.generator.generate(prompt, str(uuid4())) for prompt in prompts
+            ]
+            responses = await asyncio.gather(*tasks)
+        except Exception as e:
+            logger.error(f"Got Exception {e} while generating outputs.")
+            raise
+
+        results: list[dict[str, str | list[str]]] = []
+        for query, docs, response in zip(queries, reranked_docs, responses):
+            results.append(
+                {
+                    "query": query,
+                    "retrieved_ids": [
+                        str(doc.metadata.get("source", "")) for doc in docs
+                    ],
+                    "context_chunks": [doc.page_content for doc in docs],
+                    "response": response,
+                }
+            )
+        return results
+
     def is_stopped(self) -> bool:
         output: bool = (
             self.loader.stopped

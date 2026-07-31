@@ -130,6 +130,30 @@ The system prompt explicitly constrains the model to answer only from retrieved 
 - **CLI client**: `rich`
 - **Tooling**: `uv`, `ruff`, `black`, `pyright`, `pytest` + `pytest-asyncio` + `pytest-cov`, `pre-commit`, `locust` (load testing)
 
+## Evaluation
+
+The pipeline is evaluated on a curated set of 20 query/relevant-document pairs (CodeSearchNet Dataset) using `src/eval/run_eval.py`, which computes retrieval metrics (precision@k, recall@k, MRR) against ground-truth relevant document IDs, and a generation faithfulness score via an LLM-as-judge check on whether the answer is supported by the retrieved context.
+
+**Results (generation temperature 0.1, 20 examples):**
+
+| Metric | Score |
+|---|---|
+| Precision@3 | 0.917 |
+| Precision@5 | 0.780 |
+| Recall@3 | 1.000 |
+| Recall@5 | 1.000 |
+| MRR | 1.000 |
+| Faithfulness | 0.825 |
+
+Retrieval recall and MRR are both perfect on this set, meaning the correct document is always retrieved and consistently ranked first. Precision decreases from k=3 to k=5, which is expected once recall has already saturated at a lower k -- the additional chunks retrieved at higher k are increasingly non-relevant padding rather than missed hits.
+
+Faithfulness (0.825) is scored on a 3-point scale (no=0, partial=0.5, yes=1) by prompting the same self-hosted generation model to judge whether the pipeline's answer is supported by its retrieved context, independent of retrieval correctness.
+
+**Caveats:**
+- The eval set (20 examples) is small; scores should be read as directional rather than statistically precise.
+- Perfect recall/MRR may partly reflect the eval set's queries each having one clearly relevant document, rather than the retriever being tested against harder, ambiguous cases.
+
 ## Status
 
-Core pipeline (ingestion → retrieval → rerank → generation → API) is implemented and under active testing. Load testing, evaluation harness, and observability instrumentation are not yet part of this codebase.
+Core pipeline (ingestion → retrieval → rerank → generation → API) and evaluation (retrieval metrics + LLM-judge faithfulness scoring) are implemented and tested. Load testing and observability instrumentation are not yet part of this codebase.
+

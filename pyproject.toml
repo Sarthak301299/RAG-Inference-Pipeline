@@ -22,6 +22,7 @@ dependencies = [
     "vllm==0.26.0",
     "sentence-transformers>=5.6.1",
     "unstructured[all-docs]>=0.24.1",
+    "datasets>=5.0.1",
 ]
 
 [[tool.uv.index]]
@@ -63,6 +64,13 @@ addopts = "--import-mode=importlib"
 [tool.pyright]
 venvPath = "."
 venv = ".venv"
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.*",
+    ".venv",
+    "data"
+]
 
 [dependency-groups]
 dev = [

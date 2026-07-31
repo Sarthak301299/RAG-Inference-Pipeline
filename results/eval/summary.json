@@ -1,0 +1,497 @@
+{
+  "summary": {
+    "num_examples": 20,
+    "precision_at_k": {
+      "3": 0.9166666666666666,
+      "5": 0.78
+    },
+    "recall_at_k": {
+      "3": 1.0,
+      "5": 1.0
+    },
+    "mrr": 1.0,
+    "faithfulness": 0.825
+  },
+  "examples": [
+    {
+      "query": "Read symbol and extra from stream and explain what happens.\n        Returns the value of the symbol\n        >>> olleke.pos = 0\n        >>> l = Layout(olleke)\n        >>> l.verboseRead(WindowSizeAlphabet())\n        0000  1b                   1011 WSIZE   windowsize=(1<<22)-16=4194288\n        4194288",
+      "answer": "The value of the symbol is 1011.",
+      "retrieved_ids": [
+        "data/eval/codesearchnet/corpus/00000_research__brotlidump.py",
+        "data/eval/codesearchnet/corpus/00000_research__brotlidump.py",
+        "data/eval/codesearchnet/corpus/00000_research__brotlidump.py",
+        "data/eval/codesearchnet/corpus/00000_research__brotlidump.py",
+        "data/eval/codesearchnet/corpus/00000_research__brotlidump.py"
+      ],
+      "relevant_doc_ids": [
+        "data/eval/codesearchnet/corpus/00000_research__brotlidump.py"
+      ],
+      "precision_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "recall_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "mrr": 1.0,
+      "faithfulness": 1.0
+    },
+    {
+      "query": "Removes all fronts from `fronts` which are strictly smaller than\n    `size` consecutive frequencies in length.",
+      "answer": "The function `_remove_fronts_that_are_too_small` takes two parameters: `fronts` and `size`. It iterates over the `fronts` list and removes any fronts that are strictly smaller than `size` consecutive frequencies in length. The function uses a loop to iterate over the `fronts` list and a conditional statement to check if the length of each front is less than `size`. If the condition is true, the front is removed from the list. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and removes the front if it is. The function also includes a conditional statement to check if the length of the front is less than `size` and rem",
+      "retrieved_ids": [
+        "data/eval/codesearchnet/corpus/00001_algorithms__asa.py",
+        "data/eval/codesearchnet/corpus/00001_algorithms__asa.py",
+        "data/eval/codesearchnet/corpus/00001_algorithms__asa.py",
+        "data/eval/codesearchnet/corpus/00001_algorithms__asa.py",
+        "data/eval/codesearchnet/corpus/00001_algorithms__asa.py"
+      ],
+      "relevant_doc_ids": [
+        "data/eval/codesearchnet/corpus/00001_algorithms__asa.py"
+      ],
+      "precision_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "recall_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "mrr": 1.0,
+      "faithfulness": 1.0
+    },
+    {
+      "query": "For each key-value pair in spark conf, we need to pass to CLI in format:\n\n        --conf \"key=value\"",
+      "answer": "value",
+      "retrieved_ids": [
+        "data/eval/codesearchnet/corpus/00002_python_modules__libraries__dagster-spark__dagster_spark__utils.py",
+        "data/eval/codesearchnet/corpus/00002_python_modules__libraries__dagster-spark__dagster_spark__utils.py",
+        "data/eval/codesearchnet/corpus/00002_python_modules__libraries__dagster-spark__dagster_spark__utils.py",
+        "data/eval/codesearchnet/corpus/00013_PyFunceble__helpers.py",
+        "data/eval/codesearchnet/corpus/00009_connectordb___datapointarray.py"
+      ],
+      "relevant_doc_ids": [
+        "data/eval/codesearchnet/corpus/00002_python_modules__libraries__dagster-spark__dagster_spark__utils.py"
+      ],
+      "precision_at_k": {
+        "3": 1.0,
+        "5": 0.6
+      },
+      "recall_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "mrr": 1.0,
+      "faithfulness": 0.0
+    },
+    {
+      "query": "Return op implementing a virtual gate on given layout.",
+      "answer": "The op implementing a virtual gate on the given layout is `mapped_op_node`.",
+      "retrieved_ids": [
+        "data/eval/codesearchnet/corpus/00003_qiskit__transpiler__passes__mapping__lookahead_swap.py",
+        "data/eval/codesearchnet/corpus/00003_qiskit__transpiler__passes__mapping__lookahead_swap.py",
+        "data/eval/codesearchnet/corpus/00003_qiskit__transpiler__passes__mapping__lookahead_swap.py",
+        "data/eval/codesearchnet/corpus/00009_connectordb___datapointarray.py",
+        "data/eval/codesearchnet/corpus/00015_godot__component__recipes.py"
+      ],
+      "relevant_doc_ids": [
+        "data/eval/codesearchnet/corpus/00003_qiskit__transpiler__passes__mapping__lookahead_swap.py"
+      ],
+      "precision_at_k": {
+        "3": 1.0,
+        "5": 0.6
+      },
+      "recall_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "mrr": 1.0,
+      "faithfulness": 1.0
+    },
+    {
+      "query": "Returns the number of items covered by this flag condition the\n        user can add to the current cart. This default implementation returns\n        a big number if is_met() is true, otherwise 0.\n\n        Either this method, or is_met() must be overridden in subclasses.",
+      "answer": "The `user_quantity_remaining` method in the `RegistrasionControllersConditions` class returns the number of items covered by this flag condition the user can add to the current cart. This default implementation returns a big number if `is_met()` is true, otherwise 0. Either this method, or `is_met()` must be overridden in subclasses.",
+      "retrieved_ids": [
+        "data/eval/codesearchnet/corpus/00004_registrasion__controllers__conditions.py",
+        "data/eval/codesearchnet/corpus/00004_registrasion__controllers__conditions.py",
+        "data/eval/codesearchnet/corpus/00019_cursesmenu__curses_menu.py",
+        "data/eval/codesearchnet/corpus/00004_registrasion__controllers__conditions.py",
+        "data/eval/codesearchnet/corpus/00019_cursesmenu__curses_menu.py"
+      ],
+      "relevant_doc_ids": [
+        "data/eval/codesearchnet/corpus/00004_registrasion__controllers__conditions.py"
+      ],
+      "precision_at_k": {
+        "3": 0.6666666666666666,
+        "5": 0.6
+      },
+      "recall_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "mrr": 1.0,
+      "faithfulness": 1.0
+    },
+    {
+      "query": "Wait for the cache to be empty before resizing the pool.",
+      "answer": "The user asked for a specific instruction, and the provided text contains a relevant sentence about waiting for the cache to be empty before resizing the pool. The answer is directly stated in the text, and it is a factual statement that can be verified by the user.",
+      "retrieved_ids": [
+        "data/eval/codesearchnet/corpus/00005_loky__reusable_executor.py",
+        "data/eval/codesearchnet/corpus/00005_loky__reusable_executor.py",
+        "data/eval/codesearchnet/corpus/00005_loky__reusable_executor.py",
+        "data/eval/codesearchnet/corpus/00001_algorithms__asa.py",
+        "data/eval/codesearchnet/corpus/00013_PyFunceble__helpers.py"
+      ],
+      "relevant_doc_ids": [
+        "data/eval/codesearchnet/corpus/00005_loky__reusable_executor.py"
+      ],
+      "precision_at_k": {
+        "3": 1.0,
+        "5": 0.6
+      },
+      "recall_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "mrr": 1.0,
+      "faithfulness": 1.0
+    },
+    {
+      "query": "Get the serial number.\n\n        The serial number is formatted as a hexadecimal number encoded in\n        ASCII.\n\n        :return: The serial number.\n        :rtype: bytes",
+      "answer": "The serial number is formatted as a hexadecimal number encoded in ASCII.",
+      "retrieved_ids": [
+        "data/eval/codesearchnet/corpus/00006_src__OpenSSL__crypto.py",
+        "data/eval/codesearchnet/corpus/00006_src__OpenSSL__crypto.py",
+        "data/eval/codesearchnet/corpus/00006_src__OpenSSL__crypto.py",
+        "data/eval/codesearchnet/corpus/00006_src__OpenSSL__crypto.py",
+        "data/eval/codesearchnet/corpus/00000_research__brotlidump.py"
+      ],
+      "relevant_doc_ids": [
+        "data/eval/codesearchnet/corpus/00006_src__OpenSSL__crypto.py"
+      ],
+      "precision_at_k": {
+        "3": 1.0,
+        "5": 0.8
+      },
+      "recall_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "mrr": 1.0,
+      "faithfulness": 1.0
+    },
+    {
+      "query": "Validate an expression (may throw Exceptions)",
+      "answer": "The function `validate_expression` is defined in the `vaex.dataframe` module, which is part of the Vaex library. The function takes an expression as input and returns the result of validating the expression using the `vaex.expresso.validate_expression` function. The `vaex.expresso.validate_expression` function is a part of the Vaex library's expression engine, which is used for evaluating expressions in dataframes. The function may throw exceptions if the expression is invalid or if there are issues with the environment in which the expression is being evaluated.",
+      "retrieved_ids": [
+        "data/eval/codesearchnet/corpus/00007_packages__vaex-core__vaex__dataframe.py",
+        "data/eval/codesearchnet/corpus/00007_packages__vaex-core__vaex__dataframe.py",
+        "data/eval/codesearchnet/corpus/00007_packages__vaex-core__vaex__dataframe.py",
+        "data/eval/codesearchnet/corpus/00013_PyFunceble__helpers.py",
+        "data/eval/codesearchnet/corpus/00011_environment__lib__python2.7__site-packages__IPython__parallel__client__client.py"
+      ],
+      "relevant_doc_ids": [
+        "data/eval/codesearchnet/corpus/00007_packages__vaex-core__vaex__dataframe.py"
+      ],
+      "precision_at_k": {
+        "3": 1.0,
+        "5": 0.6
+      },
+      "recall_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "mrr": 1.0,
+      "faithfulness": 1.0
+    },
+    {
+      "query": "Return earliest start time in this collection.\n\n        Args:\n            *channels: Channels over which to obtain start_time.",
+      "answer": "0",
+      "retrieved_ids": [
+        "data/eval/codesearchnet/corpus/00008_qiskit__pulse__timeslots.py",
+        "data/eval/codesearchnet/corpus/00008_qiskit__pulse__timeslots.py",
+        "data/eval/codesearchnet/corpus/00008_qiskit__pulse__timeslots.py",
+        "data/eval/codesearchnet/corpus/00008_qiskit__pulse__timeslots.py",
+        "data/eval/codesearchnet/corpus/00008_qiskit__pulse__timeslots.py"
+      ],
+      "relevant_doc_ids": [
+        "data/eval/codesearchnet/corpus/00008_qiskit__pulse__timeslots.py"
+      ],
+      "precision_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "recall_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "mrr": 1.0,
+      "faithfulness": 1.0
+    },
+    {
+      "query": "Sort here works by sorting by timestamp by default",
+      "answer": "I cannot find the answer in the provided documents.",
+      "retrieved_ids": [
+        "data/eval/codesearchnet/corpus/00009_connectordb___datapointarray.py",
+        "data/eval/codesearchnet/corpus/00009_connectordb___datapointarray.py",
+        "data/eval/codesearchnet/corpus/00011_environment__lib__python2.7__site-packages__IPython__parallel__client__client.py",
+        "data/eval/codesearchnet/corpus/00009_connectordb___datapointarray.py",
+        "data/eval/codesearchnet/corpus/00011_environment__lib__python2.7__site-packages__IPython__parallel__client__client.py"
+      ],
+      "relevant_doc_ids": [
+        "data/eval/codesearchnet/corpus/00009_connectordb___datapointarray.py"
+      ],
+      "precision_at_k": {
+        "3": 0.6666666666666666,
+        "5": 0.6
+      },
+      "recall_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "mrr": 1.0,
+      "faithfulness": 0.0
+    },
+    {
+      "query": "Open the smbus interface on the specified bus.",
+      "answer": "The code snippet provided in the context shows how to open the smbus interface using the `open` method of the `SMBus` class. The `open` method takes the bus number as an argument and returns a file object that can be used to communicate with the I2C device on that bus. The code snippet also includes a check to ensure that the device is already open before attempting to close it. The response is a dictionary with the thought process and the code snippet. ",
+      "retrieved_ids": [
+        "data/eval/codesearchnet/corpus/00010_Adafruit_PureIO__smbus.py",
+        "data/eval/codesearchnet/corpus/00010_Adafruit_PureIO__smbus.py",
+        "data/eval/codesearchnet/corpus/00010_Adafruit_PureIO__smbus.py",
+        "data/eval/codesearchnet/corpus/00010_Adafruit_PureIO__smbus.py",
+        "data/eval/codesearchnet/corpus/00010_Adafruit_PureIO__smbus.py"
+      ],
+      "relevant_doc_ids": [
+        "data/eval/codesearchnet/corpus/00010_Adafruit_PureIO__smbus.py"
+      ],
+      "precision_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "recall_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "mrr": 1.0,
+      "faithfulness": 1.0
+    },
+    {
+      "query": "call Client.spin() in a background thread on some regular interval\n        \n        This helps ensure that messages don't pile up too much in the zmq queue\n        while you are working on other things, or just leaving an idle terminal.\n        \n        It also helps limit potential padding of the `received` timestamp\n        on AsyncResult objects, used for timings.\n        \n        Parameters\n        ----------\n        \n        interval : float, optional\n            The interval on which to spin the client in the background thread\n            (simply passed to time.sleep).\n        \n        Notes\n        -----\n        \n        For precision timing, you may want to use this method to put a bound\n        on the jitter (in seconds) in `received` timestamps used\n        in AsyncResult.wall_time.",
+      "answer": "The `spin_thread` method in the given code snippet is a background thread that calls `Client.spin()` at a specified interval. The method helps ensure that messages don't pile up too much in the zmq queue while you are working on other things, or just leaving an idle terminal. It also helps limit potential padding of the `received` timestamp on AsyncResult objects, used for timings. The method's parameters include `interval`, which specifies the interval on which to spin the client in the background thread (simply passed to time.sleep). The method's notes provide additional information about the benefits of using this method for precision timing.",
+      "retrieved_ids": [
+        "data/eval/codesearchnet/corpus/00011_environment__lib__python2.7__site-packages__IPython__parallel__client__client.py",
+        "data/eval/codesearchnet/corpus/00011_environment__lib__python2.7__site-packages__IPython__parallel__client__client.py",
+        "data/eval/codesearchnet/corpus/00011_environment__lib__python2.7__site-packages__IPython__parallel__client__client.py",
+        "data/eval/codesearchnet/corpus/00011_environment__lib__python2.7__site-packages__IPython__parallel__client__client.py",
+        "data/eval/codesearchnet/corpus/00011_environment__lib__python2.7__site-packages__IPython__parallel__client__client.py"
+      ],
+      "relevant_doc_ids": [
+        "data/eval/codesearchnet/corpus/00011_environment__lib__python2.7__site-packages__IPython__parallel__client__client.py"
+      ],
+      "precision_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "recall_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "mrr": 1.0,
+      "faithfulness": 1.0
+    },
+    {
+      "query": "Retrieves connection to Cloud Text to Speech.\n\n        :return: Google Cloud Text to Speech client object.\n        :rtype: google.cloud.texttospeech_v1.TextToSpeechClient",
+      "answer": "Google Cloud Text to Speech client object",
+      "retrieved_ids": [
+        "data/eval/codesearchnet/corpus/00012_airflow__contrib__hooks__gcp_text_to_speech_hook.py",
+        "data/eval/codesearchnet/corpus/00012_airflow__contrib__hooks__gcp_text_to_speech_hook.py",
+        "data/eval/codesearchnet/corpus/00017_scraper__tfs____init__.py",
+        "data/eval/codesearchnet/corpus/00013_PyFunceble__helpers.py",
+        "data/eval/codesearchnet/corpus/00015_godot__component__recipes.py"
+      ],
+      "relevant_doc_ids": [
+        "data/eval/codesearchnet/corpus/00012_airflow__contrib__hooks__gcp_text_to_speech_hook.py"
+      ],
+      "precision_at_k": {
+        "3": 0.6666666666666666,
+        "5": 0.4
+      },
+      "recall_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "mrr": 1.0,
+      "faithfulness": 1.0
+    },
+    {
+      "query": "Remove a given key from a given dictionary.\n\n        :param key_to_remove: The key(s) to delete.\n        :type key_to_remove: list|str\n\n        :return: The dict without the given key(s).\n        :rtype: dict|None",
+      "answer": "The function `remove_key` is designed to remove a given key from a dictionary. The function takes a single parameter, `key_to_remove`, which can be either a string or a list of strings. The function uses a try-except block to handle the case where the key does not exist in the dictionary. If the key exists, it is deleted from the dictionary using the `del` statement. If the key does not exist, the function returns `None`. The function returns the modified dictionary or `None` if the key does not exist.",
+      "retrieved_ids": [
+        "data/eval/codesearchnet/corpus/00013_PyFunceble__helpers.py",
+        "data/eval/codesearchnet/corpus/00013_PyFunceble__helpers.py",
+        "data/eval/codesearchnet/corpus/00013_PyFunceble__helpers.py",
+        "data/eval/codesearchnet/corpus/00013_PyFunceble__helpers.py",
+        "data/eval/codesearchnet/corpus/00013_PyFunceble__helpers.py"
+      ],
+      "relevant_doc_ids": [
+        "data/eval/codesearchnet/corpus/00013_PyFunceble__helpers.py"
+      ],
+      "precision_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "recall_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "mrr": 1.0,
+      "faithfulness": 1.0
+    },
+    {
+      "query": "Download csv files from GDocs and convert them into po files structure.",
+      "answer": "I cannot find the answer in the provided documents.",
+      "retrieved_ids": [
+        "data/eval/codesearchnet/corpus/00014_c3po__mod__communicator.py",
+        "data/eval/codesearchnet/corpus/00014_c3po__mod__communicator.py",
+        "data/eval/codesearchnet/corpus/00014_c3po__mod__communicator.py",
+        "data/eval/codesearchnet/corpus/00000_research__brotlidump.py",
+        "data/eval/codesearchnet/corpus/00014_c3po__mod__communicator.py"
+      ],
+      "relevant_doc_ids": [
+        "data/eval/codesearchnet/corpus/00014_c3po__mod__communicator.py"
+      ],
+      "precision_at_k": {
+        "3": 1.0,
+        "5": 0.8
+      },
+      "recall_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "mrr": 1.0,
+      "faithfulness": 0.0
+    },
+    {
+      "query": "x^2 + ax + b = 0  (or ax^2 + bx + c = 0)\n    By substituting x = y-t and t = a/2, the equation reduces to\n        y^2 + (b-t^2) = 0\n    which has easy solution\n        y = +/- sqrt(t^2-b)",
+      "answer": "{\"thought_process\": \"The user asked for the solution to the quadratic equation x^2 + ax + b = 0. The provided code snippet shows a function called quadratic that takes three parameters: a, b, and c. The function calculates the value of t using the formula t = a / 2.0. Then, it calculates the value of r using the formula r = t^2 - b. Finally, it returns the value of y using the formula y = +/- sqrt(t^2 - b). The user asked for the solution to the equation, so the answer is the value of y, which is +/- sqrt(t^2 - b). The user also asked for the formula used to calculate t, so the answer is t = a / 2.0. The user also asked for the formula used to calculate r, so the answer is r = t^2 - b. The user also asked for the formula used to calculate y, so the answer is y = +/- sqrt(t^2 - b). The user also asked for the source of the code snippet, so the answer is the file \"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        ",
+      "retrieved_ids": [
+        "data/eval/codesearchnet/corpus/00015_godot__component__recipes.py",
+        "data/eval/codesearchnet/corpus/00015_godot__component__recipes.py",
+        "data/eval/codesearchnet/corpus/00015_godot__component__recipes.py",
+        "data/eval/codesearchnet/corpus/00000_research__brotlidump.py",
+        "data/eval/codesearchnet/corpus/00001_algorithms__asa.py"
+      ],
+      "relevant_doc_ids": [
+        "data/eval/codesearchnet/corpus/00015_godot__component__recipes.py"
+      ],
+      "precision_at_k": {
+        "3": 1.0,
+        "5": 0.6
+      },
+      "recall_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "mrr": 1.0,
+      "faithfulness": 1.0
+    },
+    {
+      "query": "Return a float representing the current system-wide CPU\n    utilization as a percentage.\n\n    When interval is > 0.0 compares system CPU times elapsed before\n    and after the interval (blocking).\n\n    When interval is 0.0 or None compares system CPU times elapsed\n    since last call or module import, returning immediately.\n    In this case is recommended for accuracy that this function be\n    called with at least 0.1 seconds between calls.\n\n    When percpu is True returns a list of floats representing the\n    utilization as a percentage for each CPU.\n    First element of the list refers to first CPU, second element\n    to second CPU and so on.\n    The order of the list is consistent across calls.",
+      "answer": "The function `cpu_percent` is designed to return the current system-wide CPU utilization as a percentage. It can be called with different parameters to get different types of CPU utilization data.",
+      "retrieved_ids": [
+        "data/eval/codesearchnet/corpus/00016_environment__lib__python2.7__site-packages__psutil____init__.py",
+        "data/eval/codesearchnet/corpus/00016_environment__lib__python2.7__site-packages__psutil____init__.py",
+        "data/eval/codesearchnet/corpus/00016_environment__lib__python2.7__site-packages__psutil____init__.py",
+        "data/eval/codesearchnet/corpus/00016_environment__lib__python2.7__site-packages__psutil____init__.py",
+        "data/eval/codesearchnet/corpus/00016_environment__lib__python2.7__site-packages__psutil____init__.py"
+      ],
+      "relevant_doc_ids": [
+        "data/eval/codesearchnet/corpus/00016_environment__lib__python2.7__site-packages__psutil____init__.py"
+      ],
+      "precision_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "recall_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "mrr": 1.0,
+      "faithfulness": 1.0
+    },
+    {
+      "query": "Create a core_client.py client for a Team Foundation Server Enterprise connection instance\n\n    If token is not provided, will attempt to use the TFS_API_TOKEN\n    environment variable if present.",
+      "answer": "The function `create_tfs_core_client` is designed to create a TFS client for a Team Foundation Server Enterprise connection instance. It checks if a token is provided and attempts to use the environment variable `TFS_API_TOKEN` if not. If the token is not found, it raises a `RuntimeError`. The function returns the created TFS client.",
+      "retrieved_ids": [
+        "data/eval/codesearchnet/corpus/00017_scraper__tfs____init__.py",
+        "data/eval/codesearchnet/corpus/00017_scraper__tfs____init__.py",
+        "data/eval/codesearchnet/corpus/00017_scraper__tfs____init__.py",
+        "data/eval/codesearchnet/corpus/00017_scraper__tfs____init__.py",
+        "data/eval/codesearchnet/corpus/00017_scraper__tfs____init__.py"
+      ],
+      "relevant_doc_ids": [
+        "data/eval/codesearchnet/corpus/00017_scraper__tfs____init__.py"
+      ],
+      "precision_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "recall_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "mrr": 1.0,
+      "faithfulness": 1.0
+    },
+    {
+      "query": "Compute based on NeuralVariable.\n        :type inputs:  list of NeuralVariable\n        :return: NeuralVariable",
+      "answer": "NeuralVariable",
+      "retrieved_ids": [
+        "data/eval/codesearchnet/corpus/00018_deepy__layers__layer.py",
+        "data/eval/codesearchnet/corpus/00018_deepy__layers__layer.py",
+        "data/eval/codesearchnet/corpus/00015_godot__component__recipes.py",
+        "data/eval/codesearchnet/corpus/00013_PyFunceble__helpers.py",
+        "data/eval/codesearchnet/corpus/00018_deepy__layers__layer.py"
+      ],
+      "relevant_doc_ids": [
+        "data/eval/codesearchnet/corpus/00018_deepy__layers__layer.py"
+      ],
+      "precision_at_k": {
+        "3": 0.6666666666666666,
+        "5": 0.6
+      },
+      "recall_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "mrr": 1.0,
+      "faithfulness": 1.0
+    },
+    {
+      "query": "Select the current item and run it",
+      "answer": "The current item is set to the selected option, and the selected item is set up and then acted upon.",
+      "retrieved_ids": [
+        "data/eval/codesearchnet/corpus/00019_cursesmenu__curses_menu.py",
+        "data/eval/codesearchnet/corpus/00004_registrasion__controllers__conditions.py",
+        "data/eval/codesearchnet/corpus/00019_cursesmenu__curses_menu.py",
+        "data/eval/codesearchnet/corpus/00019_cursesmenu__curses_menu.py",
+        "data/eval/codesearchnet/corpus/00019_cursesmenu__curses_menu.py"
+      ],
+      "relevant_doc_ids": [
+        "data/eval/codesearchnet/corpus/00019_cursesmenu__curses_menu.py"
+      ],
+      "precision_at_k": {
+        "3": 0.6666666666666666,
+        "5": 0.8
+      },
+      "recall_at_k": {
+        "3": 1.0,
+        "5": 1.0
+      },
+      "mrr": 1.0,
+      "faithfulness": 0.5
+    }
+  ]
+}
