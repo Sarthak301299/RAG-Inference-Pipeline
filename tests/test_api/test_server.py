@@ -3,6 +3,7 @@ from fastapi import HTTPException, status
 
 from src.api.schemas import UserRequest
 from src.api.server import (
+    agent_lifespan,
     app,
     generate_endpoint,
     get_version_from_toml,
@@ -12,11 +13,13 @@ from src.api.server import (
     liveness_check,
     main,
     ping_endpoint,
+    rag_lifespan,
     readiness_check,
     ready_endpoint,
     startup_check,
     startup_endpoint,
 )
+from src.pipeline.agent_pipeline import AgentPipeline
 
 
 def test_get_version_missing(monkeypatch, tmp_path):
@@ -96,6 +99,10 @@ class HealthyPipeline:
     async def generate_contextualized_output(self, queries):
         assert queries == ["hello"]
         return ["answer"]
+
+    async def run(self, query):
+        assert query == "hello"
+        return "answer"
 
 
 @pytest.mark.asyncio
@@ -269,6 +276,30 @@ async def test_handle_prompt_success():
 
 
 @pytest.mark.asyncio
+async def test_handle_agent_prompt_success(monkeypatch):
+    app.state.agent_pipeline = object.__new__(AgentPipeline)
+    app.state.agent_pipeline.context_ingested = True
+
+    def is_stopped(self):
+        return False
+
+    async def run(self, query):
+        assert query == "hello"
+        return {"answer": "answer", "iterations_used": 1, "scratchpad": []}
+
+    monkeypatch.setattr("src.api.server.AgentPipeline.is_stopped", is_stopped)
+    monkeypatch.setattr("src.api.server.AgentPipeline.run", run)
+
+    response = await invocations_endpoint(UserRequest(prompt="hello"))
+
+    assert response.status == status.HTTP_200_OK
+    assert (
+        response.generated_response
+        == '{"answer":"answer","iterations_used":1,"scratchpad":[]}'
+    )
+
+
+@pytest.mark.asyncio
 async def test_handle_prompt_not_ingested():
     class Pipeline:
         context_ingested = False
@@ -276,7 +307,7 @@ async def test_handle_prompt_not_ingested():
         def is_stopped(self):
             return False
 
-    app.state.rag_pipeline = Pipeline()
+    app.state.agent_pipeline = Pipeline()
 
     response = await handle_user_prompt(UserRequest(prompt="hello"))
 
@@ -285,7 +316,7 @@ async def test_handle_prompt_not_ingested():
 
 @pytest.mark.asyncio
 async def test_handle_prompt_generation_exception():
-    app.state.rag_pipeline = BrokenGenPipeline()
+    app.state.agent_pipeline = BrokenGenPipeline()
 
     with pytest.raises(HTTPException):
         await invocations_endpoint(UserRequest(prompt="hello"))
@@ -293,14 +324,14 @@ async def test_handle_prompt_generation_exception():
 
 @pytest.mark.asyncio
 async def test_handle_prompt_readiness_exception():
-    app.state.rag_pipeline = BrokenPipeline()
+    app.state.agent_pipeline = BrokenPipeline()
 
     with pytest.raises(HTTPException):
         await handle_user_prompt(UserRequest(prompt="hello"))
 
 
 @pytest.mark.asyncio
-async def test_lifespan(monkeypatch):
+async def test_rag_lifespan(monkeypatch):
     class FakePipeline:
         def __init__(self):
             self.ingested = False
@@ -317,10 +348,34 @@ async def test_lifespan(monkeypatch):
         FakePipeline,
     )
 
-    async with app.router.lifespan_context(app):
+    async with rag_lifespan(app):
         assert app.state.rag_pipeline.ingested
 
     assert app.state.rag_pipeline.shutdown_called
+
+
+@pytest.mark.asyncio
+async def test_agent_lifespan(monkeypatch):
+    class FakePipeline:
+        def __init__(self):
+            self.ingested = False
+            self.shutdown_called = False
+
+        def ingest_data(self):
+            self.ingested = True
+
+        def shutdown(self):
+            self.shutdown_called = True
+
+    monkeypatch.setattr(
+        "src.api.server.AgentPipeline",
+        FakePipeline,
+    )
+
+    async with agent_lifespan(app):
+        assert app.state.agent_pipeline.ingested
+
+    assert app.state.agent_pipeline.shutdown_called
 
 
 def test_main(monkeypatch):
@@ -361,6 +416,13 @@ def test_main_custom_env(monkeypatch):
         "port": 9000,
         "log_level": "DEBUG",
     }
+
+
+def test_main_raises_on_invalid_lifespan(monkeypatch):
+    monkeypatch.setenv("API_EXECUTION_MODE", "invalid")
+
+    with pytest.raises(ValueError, match="API_EXECUTION_MODE"):
+        main()
 
 
 def test_main_uvicorn_exception(monkeypatch):

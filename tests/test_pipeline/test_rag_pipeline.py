@@ -38,7 +38,20 @@ def config():
             "reranker": {},
         },
         "generation": {},
+        "rag": {
+            "max_thought_process_words": 100,
+            "max_answer_words": 100,
+        },
+        "agent": {
+            "max_iterations": 10,
+            "max_thought_len": 100,
+            "max_action_input_len": 100,
+        },
     }
+
+
+def dummy_make_output_schema(max_thought_process_len=100, max_answer_len=100):
+    return {}
 
 
 @pytest.fixture
@@ -61,7 +74,7 @@ def pipeline(monkeypatch, config):
     )
 
     class DummyLoader:
-        def __init__(self, cfg):
+        def __init__(self, cfg, save_documents=False):
             self.stopped = False
 
     class DummyEmbedder:
@@ -91,7 +104,7 @@ def pipeline(monkeypatch, config):
             self.stopped = False
 
     class DummyGenerator:
-        def __init__(self, cfg):
+        def __init__(self, cfg, max_tokens=None):
             self.stopped = False
 
     monkeypatch.setattr("src.pipeline.rag_pipeline.Loader", DummyLoader)
@@ -101,6 +114,9 @@ def pipeline(monkeypatch, config):
     monkeypatch.setattr("src.pipeline.rag_pipeline.Retriever", DummyRetriever)
     monkeypatch.setattr("src.pipeline.rag_pipeline.Reranker", DummyReranker)
     monkeypatch.setattr("src.pipeline.rag_pipeline.VLLMGenerator", DummyGenerator)
+    monkeypatch.setattr(
+        "src.pipeline.rag_pipeline.make_output_schema", dummy_make_output_schema
+    )
 
     return RAGPipeLine()
 
@@ -335,10 +351,13 @@ def test_init_generator_failure(monkeypatch, config):
     monkeypatch.setattr("src.pipeline.rag_pipeline.Chunker", DummyChunker)
     monkeypatch.setattr("src.pipeline.rag_pipeline.Retriever", DummyRetriever)
     monkeypatch.setattr("src.pipeline.rag_pipeline.Reranker", DummyReranker)
+    monkeypatch.setattr(
+        "src.pipeline.rag_pipeline.make_output_schema", dummy_make_output_schema
+    )
 
     monkeypatch.setattr(
         "src.pipeline.rag_pipeline.VLLMGenerator",
-        lambda cfg: (_ for _ in ()).throw(RuntimeError("generator")),
+        lambda cfg, sch: (_ for _ in ()).throw(RuntimeError("generator")),
     )
 
     with pytest.raises(RuntimeError, match="generator"):

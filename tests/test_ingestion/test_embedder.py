@@ -491,23 +491,12 @@ class TestCleanup:
     ):
         calls = []
 
-        class FakeCuda:
-            @staticmethod
-            def is_available():
-                return True
-
-            @staticmethod
-            def empty_cache():
-                calls.append("empty_cache")
-
-            @staticmethod
-            def synchronize():
-                calls.append("synchronize")
-
+        monkeypatch.setattr(embedder.torch.cuda, "is_available", lambda: True)
         monkeypatch.setattr(
-            embedder.torch,
-            "cuda",
-            FakeCuda,
+            embedder.torch.cuda, "empty_cache", lambda: calls.append("empty_cache")
+        )
+        monkeypatch.setattr(
+            embedder.torch.cuda, "synchronize", lambda: calls.append("synchronize")
         )
 
         uninitialized_embedder.model = object()
@@ -533,23 +522,12 @@ class TestCleanup:
     ):
         calls = []
 
-        class FakeCuda:
-            @staticmethod
-            def is_available():
-                return False
-
-            @staticmethod
-            def empty_cache():
-                calls.append("empty_cache")
-
-            @staticmethod
-            def synchronize():
-                calls.append("synchronize")
-
+        monkeypatch.setattr(embedder.torch.cuda, "is_available", lambda: False)
         monkeypatch.setattr(
-            embedder.torch,
-            "cuda",
-            FakeCuda,
+            embedder.torch.cuda, "empty_cache", lambda: calls.append("empty_cache")
+        )
+        monkeypatch.setattr(
+            embedder.torch.cuda, "synchronize", lambda: calls.append("synchronize")
         )
 
         monkeypatch.setattr(

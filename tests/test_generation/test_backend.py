@@ -10,7 +10,7 @@ class DummyGenerator(backend.Generator):
         self.cleanup_called = False
         super().__init__(config)
 
-    async def generate(self, prompt, request_id):
+    async def generate(self, prompt, request_id, max_tokens=None):
         return "response"
 
     def _backend_cleanup(self):

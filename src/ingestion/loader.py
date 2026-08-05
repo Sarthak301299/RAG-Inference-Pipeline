@@ -55,7 +55,7 @@ class DynamicDirectoryUnstructuredLoader(UnstructuredLoader):
 
 
 class Loader:
-    def __init__(self, config: dict[str, str]) -> None:
+    def __init__(self, config: dict[str, str], save_documents: bool = False) -> None:
         self.stopped = True
         try:
             self.source_dir = config["source_dir"]
@@ -69,6 +69,8 @@ class Loader:
         except Exception as e:
             logger.error(f"Got Exception {e} initializing the directory loader.")
             raise
+        self.save_documents = save_documents
+        self.documents_by_source: dict[str, str] = {}
         self.stopped = False
 
     def parse_docs(self) -> dict[str, list[Document]]:
@@ -79,6 +81,12 @@ class Loader:
         except Exception as e:
             logger.error(f"Got Exception {e} loading the data for ingestion.")
             raise
+        if self.save_documents:
+            self.documents_by_source = {
+                doc.metadata["source"]: doc.page_content
+                for doc in documents
+                if "source" in doc.metadata
+            }
         grouped_docs: dict[str, list[Document]] = {}
         try:
             for doc in documents:

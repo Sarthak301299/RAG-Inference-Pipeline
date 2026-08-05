@@ -23,7 +23,7 @@ vectorDB:
 # ------------------------------------------------------------
 ingestion:
   loading:
-    source_dir: data/eval/codesearchnet/corpus
+    source_dir: data/eval/agenttest
 
   chunking:
     strategy: auto # fixed | recursive | auto
@@ -55,8 +55,6 @@ generation:
     max_num_batched_tokens: 2048
     max_tokens: 4096
     top_p: 0.95
-    max_thought_process_words: 200
-    max_answer_words: 3000
   tensorrt:
     compile_dir: .tensorrtcache
 
@@ -79,3 +77,18 @@ eval:
     docstring_field: func_documentation_string
     code_field: func_code_string
     path_field: func_path_in_repository
+
+# ------------------------------------------------------------
+# RAG
+# ------------------------------------------------------------
+rag:
+  max_thought_process_words: 200
+  max_answer_words: 3000
+
+# ------------------------------------------------------------
+# Agent
+# ------------------------------------------------------------
+agent:
+  max_iterations: 6
+  max_thought_len: 2500 # Maximum number of characters in the agent's output for thought process
+  max_action_input_len: 5000 # Maximum number of characters in the agent's output for action input field

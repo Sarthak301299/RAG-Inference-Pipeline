@@ -339,7 +339,7 @@ class TestLoader:
         instance = loader.Loader(
             {
                 "source_dir": "/data/documents",
-            }
+            },
         )
 
         assert instance.source_dir == "/data/documents"
@@ -464,7 +464,8 @@ class TestLoader:
         instance = loader.Loader(
             {
                 "source_dir": "/data/documents",
-            }
+            },
+            save_documents=True,
         )
 
         result = instance.parse_docs()

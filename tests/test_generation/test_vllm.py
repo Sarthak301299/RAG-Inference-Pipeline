@@ -18,8 +18,6 @@ def valid_config():
             "max_num_batched_tokens": "1024",
             "max_tokens": "256",
             "top_p": "0.95",
-            "max_thought_process_words": "2000",
-            "max_answer_words": "15000",
         },
     }
 
@@ -50,7 +48,12 @@ def make_fake_schema(max_thought_process_len, max_answer_len):
     return FakeSchema
 
 
-def test_init(monkeypatch, valid_config):
+@pytest.fixture
+def make_fake_schema_fixture():
+    return make_fake_schema(100, 100)
+
+
+def test_init(monkeypatch, valid_config, make_fake_schema_fixture):
     monkeypatch.setattr(
         vllm_generator,
         "AsyncEngineArgs",
@@ -77,18 +80,11 @@ def test_init(monkeypatch, valid_config):
 
     monkeypatch.setattr(
         vllm_generator,
-        "make_output_schema",
-        make_fake_schema,
-    )
-
-    monkeypatch.setattr(
-        vllm_generator,
         "InputPreprocessor",
         FakePreprocessor,
     )
 
-    gen = vllm_generator.VLLMGenerator(valid_config)
-
+    gen = vllm_generator.VLLMGenerator(valid_config, make_fake_schema_fixture)
     assert gen.model_name == "llama"
     assert gen.backend == "vllm"
 
@@ -109,32 +105,32 @@ def test_init(monkeypatch, valid_config):
         "vllm",
     ],
 )
-def test_missing_top_level_key(valid_config, missing):
+def test_missing_top_level_key(valid_config, missing, make_fake_schema_fixture):
     del valid_config[missing]
 
     with pytest.raises(KeyError):
-        vllm_generator.VLLMGenerator(valid_config)
+        vllm_generator.VLLMGenerator(valid_config, make_fake_schema_fixture)
 
 
-def test_non_dict_vllm_config(valid_config):
+def test_non_dict_vllm_config(valid_config, make_fake_schema_fixture):
     valid_config["vllm"] = "bad"
 
     with pytest.raises(TypeError):
-        vllm_generator.VLLMGenerator(valid_config)
+        vllm_generator.VLLMGenerator(valid_config, make_fake_schema_fixture)
 
 
-def test_non_str_model_name(valid_config):
+def test_non_str_model_name(valid_config, make_fake_schema_fixture):
     valid_config["model"] = 1235
 
     with pytest.raises(TypeError):
-        vllm_generator.VLLMGenerator(valid_config)
+        vllm_generator.VLLMGenerator(valid_config, make_fake_schema_fixture)
 
 
-def test_non_str_backend_name(valid_config):
+def test_non_str_backend_name(valid_config, make_fake_schema_fixture):
     valid_config["backend"] = 1235
 
     with pytest.raises(TypeError):
-        vllm_generator.VLLMGenerator(valid_config)
+        vllm_generator.VLLMGenerator(valid_config, make_fake_schema_fixture)
 
 
 @pytest.mark.parametrize(
@@ -147,21 +143,23 @@ def test_non_str_backend_name(valid_config):
         "top_p",
     ],
 )
-def test_missing_vllm_field(valid_config, field):
+def test_missing_vllm_field(valid_config, field, make_fake_schema_fixture):
     del valid_config["vllm"][field]
 
     with pytest.raises(KeyError):
-        vllm_generator.VLLMGenerator(valid_config)
+        vllm_generator.VLLMGenerator(valid_config, make_fake_schema_fixture)
 
 
-def test_invalid_numeric_field(valid_config):
+def test_invalid_numeric_field(valid_config, make_fake_schema_fixture):
     valid_config["vllm"]["temperature"] = "bad"
 
     with pytest.raises(ValueError):
-        vllm_generator.VLLMGenerator(valid_config)
+        vllm_generator.VLLMGenerator(valid_config, make_fake_schema_fixture)
 
 
-def test_engine_initialisation_failure(monkeypatch, valid_config):
+def test_engine_initialisation_failure(
+    monkeypatch, valid_config, make_fake_schema_fixture
+):
     monkeypatch.setattr(
         vllm_generator,
         "AsyncEngineArgs",
@@ -175,7 +173,7 @@ def test_engine_initialisation_failure(monkeypatch, valid_config):
     )
 
     with pytest.raises(RuntimeError):
-        vllm_generator.VLLMGenerator(valid_config)
+        vllm_generator.VLLMGenerator(valid_config, make_fake_schema_fixture)
 
 
 class FakeOutput:
@@ -197,8 +195,8 @@ async def test_generate(monkeypatch):
     )
 
     gen = vllm_generator.VLLMGenerator.__new__(vllm_generator.VLLMGenerator)
-
-    gen.sampling_params = object()  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
+    gen.max_tokens = 20
+    gen.sampling_params = SimpleNamespace(max_tokens=20)  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
     gen.stopped = False
     gen.preprocessor = FakePreprocessor(vllm_config={"a": "b"})  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
 
@@ -215,7 +213,7 @@ async def test_generate(monkeypatch):
 
     gen.vllmengine = Engine()  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
 
-    result = await gen.generate("hello", "123")
+    result = await gen.generate("hello", "123", 10)
 
     assert result == "final"
 
@@ -223,8 +221,8 @@ async def test_generate(monkeypatch):
 @pytest.mark.asyncio
 async def test_generate_empty_stream():
     gen = vllm_generator.VLLMGenerator.__new__(vllm_generator.VLLMGenerator)
-
-    gen.sampling_params = object()  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
+    gen.max_tokens = 20
+    gen.sampling_params = SimpleNamespace(max_tokens=20)  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
     gen.stopped = False
     gen.preprocessor = FakePreprocessor(vllm_config={"a": "b"})  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
 
@@ -238,7 +236,7 @@ async def test_generate_empty_stream():
 
     gen.vllmengine = Engine()  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
 
-    result = await gen.generate("hello", "id")
+    result = await gen.generate("hello", "id", None)
 
     assert result == ""
 
@@ -246,8 +244,8 @@ async def test_generate_empty_stream():
 @pytest.mark.asyncio
 async def test_generate_exception(caplog):
     gen = vllm_generator.VLLMGenerator.__new__(vllm_generator.VLLMGenerator)
-
-    gen.sampling_params = object()  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
+    gen.sampling_params = SimpleNamespace(max_tokens=20)  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
+    gen.max_tokens = 20
     gen.stopped = False
     gen.preprocessor = FakePreprocessor(vllm_config={"a": "b"})  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
 
@@ -258,7 +256,7 @@ async def test_generate_exception(caplog):
     gen.vllmengine = Engine()  # type: ignore # pyright: ignore[reportArgumentType] # fmt: ignore
 
     with caplog.at_level(logging.ERROR), pytest.raises(RuntimeError):
-        await gen.generate("hello", "id")
+        await gen.generate("hello", "id", None)
 
     assert "during output generation" in caplog.text
 

@@ -1,12 +1,12 @@
 import logging
 
+from pydantic import BaseModel
 from vllm import AsyncEngineArgs, AsyncLLMEngine, SamplingParams
 from vllm.inputs import TextPrompt
 from vllm.inputs.preprocess import InputPreprocessor
 from vllm.sampling_params import StructuredOutputsParams
 
 from src.generation.backend import Generator
-from src.generation.schemas import make_output_schema
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -15,7 +15,9 @@ logger = logging.getLogger(__name__)
 
 
 class VLLMGenerator(Generator):
-    def __init__(self, config: dict[str, str | dict[str, str]]) -> None:
+    def __init__(
+        self, config: dict[str, str | dict[str, str]], output_schema: type[BaseModel]
+    ) -> None:
         try:
             super().__init__(config)
             if not isinstance(self.model_name, str):
@@ -30,10 +32,6 @@ class VLLMGenerator(Generator):
             self.max_num_batched_tokens = int(local_conf["max_num_batched_tokens"])
             self.max_tokens = int(local_conf["max_tokens"])
             self.top_p = float(local_conf["top_p"])
-            self.max_thought_process_words = int(
-                local_conf["max_thought_process_words"]
-            )
-            self.max_answer_words = int(local_conf["max_answer_words"])
         except Exception as e:
             logger.error(f"Got Exception {e} while parsing vllm configs")
             raise
@@ -45,10 +43,7 @@ class VLLMGenerator(Generator):
             self.engineargs.max_num_batched_tokens = self.max_num_batched_tokens
             self.vllmengine = AsyncLLMEngine.from_engine_args(self.engineargs)
             self.output_schema = StructuredOutputsParams(
-                json=make_output_schema(
-                    max_thought_process_len=self.max_thought_process_words * 5,
-                    max_answer_len=self.max_answer_words * 5,
-                ).model_json_schema()
+                json=output_schema.model_json_schema()
             )
             self.sampling_params = SamplingParams(
                 temperature=self.temperature,
@@ -66,10 +61,15 @@ class VLLMGenerator(Generator):
             raise
         self.stopped = False
 
-    async def generate(self, prompt: str, request_id: str) -> str:
+    async def generate(
+        self, prompt: str, request_id: str, max_tokens: int | None = None
+    ) -> str:
         if self.stopped:
             raise RuntimeError("Generator is stopped.")
         try:
+            self.sampling_params.max_tokens = (
+                max_tokens if max_tokens is not None else self.max_tokens
+            )
             results_generator = self.vllmengine.generate(
                 prompt=self.preprocessor.preprocess(prompt=TextPrompt(prompt=prompt)),
                 sampling_params=self.sampling_params,

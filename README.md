@@ -1,6 +1,6 @@
 # RAG Inference Pipeline
 
-A self-hosted Retrieval-Augmented Generation (RAG) service that ingests documents (including source code), indexes them in a vector database, and serves grounded, structured answers through a FastAPI backend powered by vLLM.
+A self-hosted Retrieval-Augmented Generation (RAG) service that ingests documents (including source code), indexes them in a vector database, and serves grounded, structured answers through a FastAPI backend powered by vLLM. Also implements a multi-tool, multi-step ReAct-style agent which using the same core modules.
 
 ## What it does
 
@@ -48,23 +48,26 @@ config/
 src/
   ingestion/
     loader.py          # dynamic directory loader (Unstructured-based)
-    chunker.py          # type-aware chunking (recursive / fixed / language-aware / markdown)
-    embedder.py          # Hugging Face embedding wrapper
-    indexer.py            # multi-backend vector store abstraction (Qdrant / Chroma / pgvector)
+    chunker.py         # type-aware chunking (recursive / fixed / language-aware / markdown)
+    embedder.py        # Hugging Face embedding wrapper
+    indexer.py         # multi-backend vector store abstraction (Qdrant / Chroma / pgvector)
   retrieval/
-    retriever.py         # top-k retrieval from the vector store
-    reranker.py           # cross-encoder reranking
+    retriever.py       # top-k retrieval from the vector store
+    reranker.py        # cross-encoder reranking
   generation/
-    backend.py             # abstract Generator interface
-    vllm.py                 # vLLM-based async implementation
-    schemas.py               # structured output schema (Pydantic + vLLM structured outputs)
+    backend.py         # abstract Generator interface
+    vllm.py            # vLLM-based async implementation
+  agent/
+    tools.py           # tools available to the agent
+    agent.py           # agentic prompt definition, response parsing, and tool invocation
   pipeline/
-    rag_pipeline.py           # orchestrates ingestion + retrieval + generation
-    schemas.py                 # prompt construction from query + retrieved chunks
+    rag_pipeline.py    # orchestrates ingestion + retrieval + generation
+    agent_pipeline.py  # orchestrates a ReAct-style agent
+    schemas.py         # prompt construction from query + retrieved chunks and structured output schema
   api/
-    server.py                    # FastAPI app: health checks + /generate endpoint
-    client.py                      # terminal chat client (Rich-based)
-    schemas.py                      # request/response models
+    server.py          # FastAPI app: health checks + /generate endpoint
+    client.py          # terminal chat client (Rich-based)
+    schemas.py         # request/response models
 tests/
   test_ingestion/, test_retrieval/, test_generation/, test_pipeline/, test_api/
 ```
@@ -77,7 +80,9 @@ Everything is driven by `config/config.yml`, covering:
 - **Vector store**: backend choice (`qdrant` / `chroma` / `pgvector`), distance metric, retrieval-to-rerank ratio, final chunk count, search type
 - **Ingestion**: source directory, chunking strategy and size, embedding model and batch size
 - **Retrieval**: reranker model and batch size
-- **Generation**: backend (`vllm`), model name, sampling parameters, and structured-output length limits
+- **Generation**: backend (`vllm`), model name, sampling parameters
+- **RAG/Agent**: structured output limits for the two pipelines
+- **Evaluation**: evaluation directories, top_k values, CodeSearchNet settings
 
 ## Running the API
 
@@ -153,7 +158,59 @@ Faithfulness (0.825) is scored on a 3-point scale (no=0, partial=0.5, yes=1) by 
 - The eval set (20 examples) is small; scores should be read as directional rather than statistically precise.
 - Perfect recall/MRR may partly reflect the eval set's queries each having one clearly relevant document, rather than the retriever being tested against harder, ambiguous cases.
 
+## Agent
+
+In addition to the retrieval-then-generate RAG pipeline, the repository includes a ReAct-style agent that reasons in multiple steps and chooses when to invoke tools, rather than retrieving once and generating once.
+
+### How it works
+
+At each step, the agent produces a structured `thought` / `action` / `action_input` triple (constrained via guided decoding to only ever name a currently-available tool or `final_answer`, so malformed tool names aren't possible by construction). If the action isn't `final_answer`, the named tool is run and its output is appended to the running scratchpad as an observation, which is fed back into the next prompt -- this lets the agent reformulate a query, chain a retrieval result into a calculation, or recover from a tool returning no results, none of which a fixed one-shot RAG pipeline can do.
+
+```
+Query
+  │
+  ▼
+Thought → Action → (tool runs) → Observation ──┐
+  ▲                                            │
+  └────────────────────────────────────────────┘
+  │ (repeats until action == final_answer, or max_iterations is hit)
+  ▼
+Final Answer
+```
+
+### Tools
+
+| Tool | Purpose |
+|---|---|
+| `retrieve_documents` | Semantic search over the ingested corpus (wraps the same `Retriever`/`Reranker` used by the RAG pipeline) |
+| `calculator` | Evaluates arithmetic expressions via a whitelisted AST walk. |
+| `file_lookup` | Returns the full content of a specific ingested file by exact source path |
+
+### Safety and robustness
+
+- A `max_iterations` cutoff (config-driven) prevents unbounded loops, since there's no general guarantee an LLM agent will choose to terminate on its own.
+- Malformed or unparseable model output at any step is recorded as an observation and the loop continues, rather than crashing the run.
+- If `max_iterations` is exceeded, the partial scratchpad is preserved and returned as a best-effort result rather than discarded.
+- Unknown tool names or tool execution failures are converted into observation text (fed back to the model) rather than raised as exceptions.
+- At each step, a check is performed to see if the same tool with the same input is being called consecutively. As the toolset here is deterministic, repeated consecutive calls are instead responded to with an error message explicitly informing the LLM to use the previous result or use a different tool/input/final_answer.
+
+### Running in agent mode
+
+The API serves either the RAG pipeline or the agent, selected at startup via `API_EXECUTION_MODE=rag` or `API_EXECUTION_MODE=agent` -- the two are mutually exclusive within a single process, since each maintains its own generation engine. In agent mode, `/generate` and `/invocations` return a `UserResponse` whose `generated_response` field is a JSON string matching `AgentQueryResponse` (`answer`, `iterations_used`, and the full `scratchpad`).
+
+### Query Examples:
+Correctly invokes `retrieve_documents` tool:
+![query_1](results/agent/query_1.jpg)
+
+Invokes `calculator` tool, identifies error, recalls with corrected input:
+![query_2](results/agent/query_2.jpg)
+
+Invokes `calculator` tool, identifies error, calls `retrieve_documents` to get required value, recalls `calculator` tool:
+![query_3](results/agent/query_3.jpg)
+
+Invokes `retrieve_documents` tool repeatedly for absent information, gets error when same action with same input is invoked consecutively and stops the repitition before `max_iterations` is reached:
+![query_4](results/agent/query_4.jpg)
+
 ## Status
 
-Core pipeline (ingestion → retrieval → rerank → generation → API) and evaluation (retrieval metrics + LLM-judge faithfulness scoring) are implemented and tested. Load testing and observability instrumentation are not yet part of this codebase.
-
+Core pipeline (ingestion → retrieval → rerank → generation → API) and evaluation (retrieval metrics + LLM-judge faithfulness scoring) are implemented and tested. Agentic pipeline (thought → action → observation → repeat until final answer) is implemented and tested. Load testing and observability instrumentation are not yet part of this codebase.

@@ -19,7 +19,9 @@ class Generator(ABC):
             raise
 
     @abstractmethod
-    async def generate(self, prompt: str, request_id: str) -> str: ...
+    async def generate(
+        self, prompt: str, request_id: str, max_tokens: int | None = None
+    ) -> str: ...
 
     @abstractmethod
     def _backend_cleanup(self) -> None: ...

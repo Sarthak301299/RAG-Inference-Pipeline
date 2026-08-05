@@ -30,7 +30,7 @@ class DummyStatus:
 
 def test_startup_banner(monkeypatch):
     console = FakeConsole()
-
+    monkeypatch.setenv("API_EXECUTION_MODE", "rag")
     monkeypatch.setattr("src.api.client.Console", lambda: console)
     monkeypatch.setattr("src.api.client.Prompt.ask", lambda *args, **kwargs: "exit")
     monkeypatch.setattr(
@@ -45,7 +45,7 @@ def test_startup_banner(monkeypatch):
 
 def test_exit(monkeypatch):
     console = FakeConsole()
-
+    monkeypatch.setenv("API_EXECUTION_MODE", "rag")
     monkeypatch.setattr("src.api.client.Console", lambda: console)
     monkeypatch.setattr("src.api.client.Prompt.ask", lambda *args, **kwargs: "exit")
     monkeypatch.setattr(
@@ -60,7 +60,7 @@ def test_exit(monkeypatch):
 
 def test_quit(monkeypatch):
     console = FakeConsole()
-
+    monkeypatch.setenv("API_EXECUTION_MODE", "rag")
     monkeypatch.setattr("src.api.client.Console", lambda: console)
     monkeypatch.setattr("src.api.client.Prompt.ask", lambda *args, **kwargs: "quit")
     monkeypatch.setattr(
@@ -73,7 +73,7 @@ def test_quit(monkeypatch):
 
 def test_empty_prompt(monkeypatch):
     console = FakeConsole()
-
+    monkeypatch.setenv("API_EXECUTION_MODE", "rag")
     answers = iter(["", "exit"])
 
     monkeypatch.setattr("src.api.client.Console", lambda: console)
@@ -88,8 +88,22 @@ def test_empty_prompt(monkeypatch):
         main()
 
 
-def test_success(monkeypatch):
+@pytest.mark.parametrize(
+    ("mode", "genresp"),
+    [
+        (
+            "rag",
+            '{"thought_process" : "thought" , "answer" : "hello" , "sources" : ["source"]}',
+        ),
+        (
+            "agent",
+            '{"answer" : "hello" , "iterations_used" : "2" , "scratchpad" : [{"thought" : "thought", "action" : "action", "action_input" : "action_input", "observation" : "observation"}]}',
+        ),
+    ],
+)
+def test_success(monkeypatch, mode, genresp):
     console = FakeConsole()
+    monkeypatch.setenv("API_EXECUTION_MODE", mode)
 
     class FakeResponse:
         status_code = 200
@@ -97,7 +111,7 @@ def test_success(monkeypatch):
         def json(self):
             return {
                 "status": 200,
-                "generated_response": '{"thought_process" : "thought" , "answer" : "hello" , "sources" : ["source"]}',
+                "generated_response": genresp,
             }
 
     answers = iter(["question", "exit"])
@@ -118,37 +132,57 @@ def test_success(monkeypatch):
         main()
 
     panel = console.output[-1][0][0]
-    response_panels = [
-        args[0]
-        for args, _ in console.output
-        if args
-        and isinstance(args[0], Panel)
-        and args[0].title == "[bold blue]System Response[/bold blue]"
-    ]
-    assert len(response_panels) == 1
-    panel = response_panels[0]
-    assert isinstance(panel, Panel)
-    group = panel.renderable
-    assert isinstance(group, Group)
-    thought_panel = cast(Panel, group.renderables[0])
-    answer_panel = cast(Panel, group.renderables[1])
-    sources_panel = cast(Panel, group.renderables[2])
+    if mode == "agent":
+        response_panels = [
+            args[0]
+            for args, _ in console.output
+            if args
+            and isinstance(args[0], Panel)
+            and args[0].title == "Agent Execution Trace"
+        ]
+        assert len(response_panels) == 1
+        panel = response_panels[0]
+        assert isinstance(panel, Panel)
+        group = panel.renderable
+        assert isinstance(group, Group)
+        summ_panel = cast(Panel, group.renderables[0])
+        assert summ_panel.title == "Summary Execution Info"
 
-    assert thought_panel.title == "[bold red]Thought Process[/bold red]"
-    assert answer_panel.title == "[bold green]Answer[/bold green]"
-    assert sources_panel.title == "[bold yellow]Sources[/bold yellow]"
+        assert isinstance(summ_panel.renderable, str)
 
-    assert isinstance(thought_panel.renderable, Text)
-    assert isinstance(answer_panel.renderable, Text)
-    assert isinstance(sources_panel.renderable, Text)
+    else:
+        response_panels = [
+            args[0]
+            for args, _ in console.output
+            if args
+            and isinstance(args[0], Panel)
+            and args[0].title == "[bold blue]System Response[/bold blue]"
+        ]
+        assert len(response_panels) == 1
+        panel = response_panels[0]
+        assert isinstance(panel, Panel)
+        group = panel.renderable
+        assert isinstance(group, Group)
+        thought_panel = cast(Panel, group.renderables[0])
+        answer_panel = cast(Panel, group.renderables[1])
+        sources_panel = cast(Panel, group.renderables[2])
 
-    assert thought_panel.renderable.plain == "thought"
-    assert answer_panel.renderable.plain == "hello"
-    assert sources_panel.renderable.plain == "source"
+        assert thought_panel.title == "[bold red]Thought Process[/bold red]"
+        assert answer_panel.title == "[bold green]Answer[/bold green]"
+        assert sources_panel.title == "[bold yellow]Sources[/bold yellow]"
+
+        assert isinstance(thought_panel.renderable, Text)
+        assert isinstance(answer_panel.renderable, Text)
+        assert isinstance(sources_panel.renderable, Text)
+
+        assert thought_panel.renderable.plain == "thought"
+        assert answer_panel.renderable.plain == "hello"
+        assert sources_panel.renderable.plain == "source"
 
 
 def test_server_returns_error_response(monkeypatch):
     console = FakeConsole()
+    monkeypatch.setenv("API_EXECUTION_MODE", "rag")
 
     class FakeResponse:
         status_code = 200
@@ -184,6 +218,7 @@ def test_server_returns_error_response(monkeypatch):
 
 def test_http_error(monkeypatch):
     console = FakeConsole()
+    monkeypatch.setenv("API_EXECUTION_MODE", "rag")
 
     class FakeResponse:
         status_code = 503
@@ -213,7 +248,7 @@ def test_http_error(monkeypatch):
 
 def test_connection_error(monkeypatch):
     console = FakeConsole()
-
+    monkeypatch.setenv("API_EXECUTION_MODE", "rag")
     answers = iter(["question", "exit"])
 
     monkeypatch.setattr("src.api.client.Console", lambda: console)
@@ -241,7 +276,7 @@ def test_connection_error(monkeypatch):
 
 def test_keyboard_interrupt(monkeypatch):
     console = FakeConsole()
-
+    monkeypatch.setenv("API_EXECUTION_MODE", "rag")
     monkeypatch.setattr("src.api.client.Console", lambda: console)
 
     def fake_prompt(*args, **kwargs):
@@ -260,7 +295,7 @@ def test_keyboard_interrupt(monkeypatch):
 
 def test_environment_variables(monkeypatch):
     console = FakeConsole()
-
+    monkeypatch.setenv("API_EXECUTION_MODE", "rag")
     monkeypatch.setenv("API_HOST", "localhost")
     monkeypatch.setenv("API_PORT", "9999")
 
@@ -295,3 +330,10 @@ def test_environment_variables(monkeypatch):
         main()
 
     assert called["url"] == "http://localhost:9999/generate"
+
+
+def test_main_raises_on_invalid_lifespan(monkeypatch):
+    monkeypatch.setenv("API_EXECUTION_MODE", "invalid")
+
+    with pytest.raises(ValueError, match="API_EXECUTION_MODE"):
+        main()

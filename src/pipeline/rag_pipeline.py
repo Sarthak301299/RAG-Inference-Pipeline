@@ -10,7 +10,7 @@ from src.ingestion.chunker import Chunker
 from src.ingestion.embedder import Embedder
 from src.ingestion.indexer import Indexer
 from src.ingestion.loader import Loader
-from src.pipeline.schemas import RAGInputPromptFormat
+from src.pipeline.schemas import RAGInputPromptFormat, make_output_schema
 from src.retrieval.reranker import Reranker
 from src.retrieval.retriever import Retriever
 
@@ -27,6 +27,10 @@ class RAGPipeLine:
         try:
             with open("config/config.yml", "r") as file:
                 self.config = yaml.safe_load(file)
+            self.max_thought_process_words = int(
+                self.config["rag"]["max_thought_process_words"]
+            )
+            self.max_answer_words = int(self.config["rag"]["max_answer_words"])
         except Exception as e:
             logger.error(f"Got Exception {e} parsing configuration file")
             raise
@@ -62,7 +66,13 @@ class RAGPipeLine:
             raise
         logger.info("Initializing Generator Module.")
         try:
-            self.generator = VLLMGenerator(self.config["generation"])
+            self.generator = VLLMGenerator(
+                self.config["generation"],
+                make_output_schema(
+                    max_thought_process_len=self.max_thought_process_words * 5,
+                    max_answer_len=self.max_answer_words * 5,
+                ),
+            )
         except Exception as e:
             logger.error(f"Got Exception {e} initializing generation objects")
             raise
